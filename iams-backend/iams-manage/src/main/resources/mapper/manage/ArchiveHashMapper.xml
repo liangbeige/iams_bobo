@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.ArchiveHashMapper">
+
+    <resultMap type="com.iams.manage.domain.ArchiveHash" id="ArchiveHashResult">
+        <id     property="id"               column="id" />
+        <result property="archiveId"        column="archive_id" />
+        <result property="authenticityHash" column="authenticity_hash" />
+        <result property="integrityHash"    column="integrity_hash" />
+        <result property="lastCheckTime"    column="last_check_time" />
+        <result property="checkCount"       column="check_count" />
+        <result property="createTime"       column="create_time" />
+        <result property="updateTime"       column="update_time" />
+        <result property="configCharacteristics" column="config_characteristics" />
+    </resultMap>
+
+    <sql id="selectArchiveHashVo">
+        select id, archive_id, authenticity_hash, integrity_hash, last_check_time, check_count, create_time, update_time, config_characteristics
+        from tb_archive_hash
+    </sql>
+
+    <select id="selectArchiveHashList" parameterType="com.iams.manage.domain.ArchiveHash" resultMap="ArchiveHashResult">
+        <include refid="selectArchiveHashVo"/>
+        <where>
+            <if test="archiveId != null">
+                and archive_id = #{archiveId}
+            </if>
+            <if test="authenticityHash != null and authenticityHash != ''">
+                and authenticity_hash = #{authenticityHash}
+            </if>
+            <if test="integrityHash != null and integrityHash != ''">
+                and integrity_hash = #{integrityHash}
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                and date_format(last_check_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                and date_format(last_check_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+            <if test="configCharacteristics != null and configCharacteristics != ''">
+                and config_characteristics = #{configCharacteristics}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="selectArchiveHashById" parameterType="Long" resultMap="ArchiveHashResult">
+        <include refid="selectArchiveHashVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectByArchiveId" parameterType="Long" resultMap="ArchiveHashResult">
+        <include refid="selectArchiveHashVo"/>
+        where archive_id = #{archiveId}
+    </select>
+
+    <select id="checkArchiveIdUnique" parameterType="Long" resultType="int">
+        select count(1) from tb_archive_hash where archive_id = #{archiveId} limit 1
+    </select>
+
+    <insert id="insertArchiveHash" parameterType="com.iams.manage.domain.ArchiveHash" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_archive_hash
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">archive_id,</if>
+            <if test="authenticityHash != null and authenticityHash != ''">authenticity_hash,</if>
+            <if test="integrityHash != null and integrityHash != ''">integrity_hash,</if>
+            <if test="lastCheckTime != null">last_check_time,</if>
+            <if test="checkCount != null">check_count,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="configCharacteristics != null and configCharacteristics != ''">config_characteristics,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="authenticityHash != null and authenticityHash != ''">#{authenticityHash},</if>
+            <if test="integrityHash != null and integrityHash != ''">#{integrityHash},</if>
+            <if test="lastCheckTime != null">#{lastCheckTime},</if>
+            <if test="checkCount != null">#{checkCount},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="configCharacteristics != null and configCharacteristics != ''">#{configCharacteristics},</if>
+        </trim>
+    </insert>
+
+    <update id="updateArchiveHash" parameterType="com.iams.manage.domain.ArchiveHash">
+        update tb_archive_hash
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="authenticityHash != null and authenticityHash != ''">authenticity_hash = #{authenticityHash},</if>
+            <if test="integrityHash != null and integrityHash != ''">integrity_hash = #{integrityHash},</if>
+            <if test="lastCheckTime != null">last_check_time = #{lastCheckTime},</if>
+            <if test="checkCount != null">check_count = #{checkCount},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="configCharacteristics != null and configCharacteristics != ''">config_characteristics = #{configCharacteristics},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <insert id="saveOrUpdateHash" parameterType="com.iams.manage.domain.ArchiveHash">
+        INSERT INTO tb_archive_hash (
+            archive_id,
+            authenticity_hash,
+            integrity_hash,
+            last_check_time,
+            check_count
+        ) VALUES (
+                     #{archiveId},
+                     #{authenticityHash},
+                     #{integrityHash},
+                     #{lastCheckTime},
+                     #{checkCount}
+                 ) ON DUPLICATE KEY UPDATE
+            authenticity_hash = VALUES(authenticity_hash),
+            integrity_hash = VALUES(integrity_hash),
+            last_check_time = VALUES(last_check_time),
+            check_count = check_count + 1,
+            update_time = NOW()
+    </insert>
+
+    <update id="updateCheckCount" parameterType="Long">
+        update tb_archive_hash set check_count = check_count + 1, last_check_time = NOW() where archive_id = #{archiveId}
+    </update>
+
+</mapper>

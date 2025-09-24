@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+	<link rel="stylesheet" href="./static/swiper.min.css">
+	<link rel="stylesheet" type="text/css" href="./static/style.css">
+	<title>智慧档案管理系统管控平台</title>
+	<style id="ai-assist-right-style">
+		html.ai-assist-html {
+			width: calc(100% - 480px) !important;
+			position: relative !important;
+			min-height: 100vh !important
+		}
+
+		.ai-assist-highlight {
+			background: yellow;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="tsg box report" id="app">
+		<!-- head -->
+		<div class="tsg_head ">
+			<div class="tsg_title fc">
+				<div class="d1">
+					<p id="time">2024-6-21 10:1:49</p>
+				</div>
+				<div class="d2">智慧档案管理系统大屏看板</div>
+				<div class="d3"><iframe allowtransparency="true" frameborder="0" width="255" height="60" scrolling="no"
+						src="https://tianqi.2345.com/plugin/widget/index.htm?s=1&z=1&t=1&v=0&d=1&bd=0&k=000000&f=00ffff&ltf=009944&htf=cc0000&q=0&e=0&a=1&c=54511&w=255&h=60&align=center"></iframe>
+				</div>
+			</div>
+			<div class="tsg_hul fc">
+				<div class="tsg_hli">
+					<p class="p1"><img class="img1" src="./static/right.png"><span>档案总数</span><img class="img2"
+							src="./static/right.png"></p>
+					<p class="p2">{{ statistics.archivedCount + statistics.pendingCount }}<span>册</span></p>
+				</div>
+				<div class="tsg_hli">
+					<p class="p1"><img class="img1" src="./static/right.png"><span>新增档案</span><img class="img2"
+							src="./static/right.png"></p>
+					<p class="p2">{{ statistics.archivedCount }}<span>册</span></p>
+				</div>
+				<div class="tsg_hli">
+					<p class="p1"><img class="img1" src="./static/right.png"><span>在馆档案</span><img class="img2"
+							src="./static/right.png"></p>
+					<p class="p2">{{ archiveOnShelf }}<span>册</span></p>
+				</div>
+				<div class="tsg_hli">
+					<p class="p1"><img class="img1" src="./static/right.png"><span>借阅总量</span><img class="img2"
+							src="./static/right.png"></p>
+					<p class="p2">{{ statistics.totalBorrows }}<span>册</span></p>
+				</div>
+				<div class="tsg_hli">
+					<p class="p1"><img class="img1" src="./static/right.png"><span>最近借阅</span><img class="img2"
+							src="./static/right.png"></p>
+					<p class="p2">{{ statistics.totalLoans }}<span>册</span></p>
+				</div>
+			</div>
+		</div>
+		<div class="tsg_box fl">
+			<!-- 左侧 -->
+			<div class="tsg_box_left tsg_box_lis">
+				<!-- 归档档案/档案利用分析 -->
+				<div class="tsg_box_left_li tsg_table_6">
+					<div class="tsg_box_t tsg_hli">
+						<p class="p1"><img class="img1" src="./static/right.png"><span>归档档案/档案利用分析</span><img
+								class="img2" src="./static/right.png"></p>
+					</div>
+					<!-- echarts_1 -->
+					<div id="echarts_1" class="echarts_1"
+						style="-webkit-tap-highlight-color: transparent; user-select: none; position: relative;">
+						<div
+							style="position: relative; width: 559px; height: 243px; padding: 0px; margin: 0px; border-width: 0px;">
+							<canvas data-zr-dom-id="zr_0" width="559" height="243"
+								style="position: absolute; left: 0px; top: 0px; width: 559px; height: 243px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); padding: 0px; margin: 0px; border-width: 0px;"></canvas>
+						</div>
+						<div></div>
+					</div>
+				</div>
+				<!-- 在馆数/逾期待归还分析 -->
+				<div class="tsg_box_left_li tsg_table_6">
+					<div class="tsg_box_t tsg_hli">
+						<p class="p1"><img class="img1" src="./static/right.png"><span>在馆档案数据分布柱状图</span><img
+								class="img2" src="./static/right.png"></p>
+					</div>
+					<!-- echarts_2 -->
+					<div>
+						<div id="echarts_2" class="echarts_1 echarts_tab"
+							style="-webkit-tap-highlight-color: transparent; user-select: none; position: relative; display: block;">
+							<div
+								style="position: relative; width: 559px; height: 243px; padding: 0px; margin: 0px; border-width: 0px;">
+								<canvas data-zr-dom-id="zr_0" width="559" height="243"
+									style="position: absolute; left: 0px; top: 0px; width: 559px; height: 243px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); padding: 0px; margin: 0px; border-width: 0px;"></canvas>
+							</div>
+							<div></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 中间 -->
+			<div class="tsg_box_center tsg_box_lis">
+				<!-- 实时客流分析 -->
+				<div class="tsg_box_left_li tsg_table_3">
+					<div class="tsg_box_t tsg_hli">
+						<p class="p1"><img class="img1" src="./static/right.png"><span>实时客流分析</span><img class="img2"
+								src="./static/right.png"></p>
+					</div>
+					<div class="tsg_online_kl fc">
+						<div class="tsg_online_kl_li fc">
+							<div>
+								<div class="tsg_box_t tsg_hli">
+									<p class="p1"><img class="img1" src="./static/right.png"><span>今日入馆</span><img
+											class="img2" src="./static/right.png"></p>
+								</div>
+								<div class="tsg_online_kl_1">235</div>
+								<div class="tsg_online_kl_2">人</div>
+							</div>
+						</div>
+						<div class="tsg_online_kl_li fc">
+							<div>
+								<div class="tsg_box_t tsg_hli">
+									<p class="p1"><img class="img1" src="./static/right.png"><span>当前在馆</span><img
+											class="img2" src="./static/right.png"></p>
+								</div>
+								<div class="tsg_online_kl_1 tsg_online_kl_11">95</div>
+								<div class="tsg_online_kl_2">人</div>
+							</div>
+						</div>
+					</div>
+					<div class="tsg_online_text">7小时内访客滞馆情况</div>
+					<!-- echarts_3 -->
+					<div id="echarts_3" class="echarts_2"
+						style="-webkit-tap-highlight-color: transparent; user-select: none; position: relative;">
+						<div
+							style="position: relative; width: 552px; height: 270px; padding: 0px; margin: 0px; border-width: 0px;">
+							<canvas data-zr-dom-id="zr_0" width="552" height="270"
+								style="position: absolute; left: 0px; top: 0px; width: 552px; height: 270px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); padding: 0px; margin: 0px; border-width: 0px;"></canvas>
+						</div>
+						<div></div>
+					</div>
+				</div>
+			</div>
+			<!-- 右侧 -->
+			<div class="tsg_box_right tsg_box_lis">
+				<!-- 最近的借阅记录 -->
+				<div class="tsg_box_left_li tsg_table_7">
+					<div class="tsg_box_t tsg_hli">
+						<p class="p1"><img class="img1" src="./static/right.png"><span>最近的借阅记录</span><img class="img2"
+								src="./static/right.png"></p>
+					</div>
+					<div class="tsg_box_rul tsg_box_rul24 ">
+						<div class="tsg_box_rhead fc">
+							<div class="d1">借阅人</div>
+							<div class="d1">申请时间</div>
+							<div class="d1">借阅状态</div>
+						</div>
+						<div class="tsg_box_rtr">
+							<div v-for="(record, index) in borrowRecords" :key="record.id || index"
+								class="tsg_box_rli fc">
+								<div class="d2">{{ record.userName || '-' }}</div>
+								<div class="d3">{{ record.startApplyTime || '-' }}</div>
+								<div class="d4" :style="getStatusStyle(record.status)">{{ record.status || '-' }}</div>
+							</div>
+							<!-- 如果没有数据，显示默认信息 -->
+							<div v-if="borrowRecords.length === 0" class="tsg_box_rli fc">
+								<div class="d2" style="text-align: center; color: #999; width: 100%;">暂无借阅记录</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- 档案构成情况分析 -->
+				<div class="tsg_box_left_li tsg_table_7">
+					<div class="tsg_box_t tsg_hli">
+						<p class="p1"><img class="img1" src="./static/right.png"><span>档案构成情况分析</span><img class="img2"
+								src="./static/right.png"></p>
+					</div>
+					<div class="tsg_box_two fc">
+						<div id="echarts_4" class="echarts_3 tsg_box_two_li"
+							style="-webkit-tap-highlight-color: transparent; user-select: none; position: relative;">
+							<div
+								style="position: relative; width: 279px; height: 270px; padding: 0px; margin: 0px; border-width: 0px;">
+								<canvas data-zr-dom-id="zr_0" width="279" height="270"
+									style="position: absolute; left: 0px; top: 0px; width: 279px; height: 270px; user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); padding: 0px; margin: 0px; border-width: 0px;"></canvas>
+							</div>
+							<div></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 引入依赖库 -->
+	<script type="text/javascript" src="./static/jquery.min.js"></script>
+	<script type="text/javascript" src="./static/swiper.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+	<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+	<script>
+		// 配置变量 - 替代 import.meta.env
+		const CONFIG = {
+			BASE_API: '/prod-api', // 根据实际情况修改API基础路径
+			// 其他配置项...
+		};
+
+		const { createApp, ref, onMounted, onUnmounted, computed, nextTick } = Vue;
+
+		createApp({
+			setup() {
+				// 响应式数据
+				const statistics = ref({
+					totalBorrows: 0,
+					totalReturns: 0,
+					totalLoans: 0,
+					totalLost: 0,
+					archivedCount: 0,
+					pendingCount: 0,
+					electronicCount: 0,
+					physicalCount: 0
+				});
+
+				const recent7DaysData = ref([]);
+				const borrowRecords = ref([]); // 新增借阅记录数据
+				const loading = ref(false);
+
+				function getToken() {
+					return localStorage.getItem('Admin-Token') || '';
+				}
+				const headers = ref({ Authorization: "Bearer " + getToken() });
+
+				// 计算在馆档案数量
+				const archiveOnShelf = computed(() => {
+					return (statistics.value.archivedCount || 0) + (statistics.value.pendingCount || 0) - (statistics.value.totalLoans || 0) + (statistics.value.totalReturns || 0);
+				});
+
+				// 根据状态返回样式
+				const getStatusStyle = (status) => {
+					const styles = {
+						'已结束': { color: '#00d4ff' },
+						'已逾期': { color: '#ff6b6b' },
+						'进行中': { color: '#ffa726' },
+						'已取消': { color: '#999' }
+					};
+					return styles[status] || { color: '#fff' };
+				};
+
+				// 真实API调用函数 - 获取最新统计数据
+				const getLatestStatistics = async () => {
+					try {
+						loading.value = true;
+						console.log('正在调用API获取最新统计数据...');
+
+						// 使用CONFIG替代import.meta.env
+						const response = await axios.get(`${CONFIG.BASE_API}/manage/statistics/latest`, {
+							headers: {
+								'Authorization': headers.value.Authorization,
+							}
+						});
+
+						const data = response.data?.data || response.data;
+
+						if (data) {
+							console.log('API返回的统计数据:', data);
+							return {
+								totalBorrows: data.totalBorrows || 0,
+								totalReturns: data.totalReturns || 0,
+								totalLoans: data.totalLoans || 0,
+								totalLost: data.totalLost || 0,
+								archivedCount: data.archivedCount || 0,
+								pendingCount: data.pendingCount || 0,
+								electronicCount: data.electronicCount || 0,
+								physicalCount: data.physicalCount || 0
+							};
+						}
+					} catch (error) {
+						console.error('API调用失败，详细错误:', error);
+						console.warn('使用模拟数据代替真实API数据');
+
+						// API调用失败时返回模拟数据
+						return {
+							totalBorrows: 177413,
+							totalReturns: 156789,
+							totalLoans: 20624,
+							totalLost: 1066,
+							archivedCount: 76921,
+							pendingCount: 19206,
+							electronicCount: 45678,
+							physicalCount: 50549
+						};
+					} finally {
+						loading.value = false;
+					}
+				};
+
+				// 真实API调用函数 - 获取最近7天数据
+				const getRecent7DaysData = async () => {
+					try {
+						loading.value = true;
+						console.log('正在调用API获取最近7天数据...');
+
+						const response = await axios.get(`${CONFIG.BASE_API}/manage/statistics/recent-borrow`, {
+							headers: { 'Authorization': headers.value.Authorization },
+							params: { days: 7 }
+						});
+
+						const data = response.data?.data || response.data;
+
+						if (data && Array.isArray(data)) {
+							console.log('API返回的7天数据:', data);
+							return data.sort((a, b) => new Date(a.statDate) - new Date(b.statDate));
+						}
+					} catch (error) {
+						console.error('获取7天数据API调用失败，详细错误:', error);
+						console.warn('使用模拟7天数据');
+
+						// 生成模拟数据
+						const mockData = [];
+						const today = new Date();
+						for (let i = 6; i >= 0; i--) {
+							const date = new Date(today);
+							date.setDate(today.getDate() - i);
+							mockData.push({
+								statDate: date.toISOString().split('T')[0],
+								archivedCount: Math.floor(Math.random() * 100) + 50,
+								totalBorrows: Math.floor(Math.random() * 80) + 20,
+								totalReturns: Math.floor(Math.random() * 70) + 15,
+								totalLoans: Math.floor(Math.random() * 30) + 10,
+								totalLost: Math.floor(Math.random() * 20) + 5
+							});
+						}
+						console.log('生成的模拟数据:', mockData);
+						return mockData;
+					} finally {
+						loading.value = false;
+					}
+				};
+
+				// 真实API调用函数 - 获取借阅记录
+				const getBorrowRecords = async () => {
+					try {
+						loading.value = true;
+						console.log('正在调用API获取借阅记录...');
+
+						const response = await axios.get(`${CONFIG.BASE_API}/manage/record/list`, {
+							headers: {
+								'Authorization': headers.value.Authorization,
+							},
+							params: {
+								pageNum: 1,
+								pageSize: 10 // 获取10条记录
+							}
+						});
+
+						const data = response.data;
+
+						if (data && data.code === 200 && data.rows) {
+							console.log('API返回的借阅记录:', data.rows);
+							// 只取前10条记录
+							return data.rows.slice(0, 6);
+						}
+					} catch (error) {
+						console.error('获取借阅记录API调用失败，详细错误:', error);
+						console.warn('使用模拟借阅记录数据');
+
+						// API调用失败时返回模拟数据
+						return [
+							{
+								id: 1,
+								userName: '张三',
+								startApplyTime: '2025-07-20',
+								status: '已结束'
+							},
+							{
+								id: 2,
+								userName: '李四',
+								startApplyTime: '2025-07-19',
+								status: '已逾期'
+							},
+							{
+								id: 3,
+								userName: '王五',
+								startApplyTime: '2025-07-18',
+								status: '进行中'
+							},
+							{
+								id: 4,
+								userName: '赵六',
+								startApplyTime: '2025-07-17',
+								status: '已结束'
+							},
+							{
+								id: 5,
+								userName: '钱七',
+								startApplyTime: '2025-07-16',
+								status: '已取消'
+							},
+							{
+								id: 6,
+								userName: '孙八',
+								startApplyTime: '2025-07-15',
+								status: '已结束'
+							},
+							{
+								id: 7,
+								userName: '周九',
+								startApplyTime: '2025-07-14',
+								status: '进行中'
+							},
+							{
+								id: 8,
+								userName: '吴十',
+								startApplyTime: '2025-07-13',
+								status: '已逾期'
+							},
+							{
+								id: 9,
+								userName: '郑十一',
+								startApplyTime: '2025-07-12',
+								status: '已结束'
+							},
+							{
+								id: 10,
+								userName: '王十二',
+								startApplyTime: '2025-07-11',
+								status: '已结束'
+							}
+						];
+					} finally {
+						loading.value = false;
+					}
+				};
+
+				// 显示消息的函数
+				const showMessage = (message, type = 'info') => {
+					console.log(`[${type.toUpperCase()}] ${message}`);
+				};
+
+				// 等待ECharts加载完成
+				const waitForECharts = () => {
+					return new Promise((resolve) => {
+						const checkECharts = () => {
+							if (typeof echarts !== 'undefined') {
+								resolve(true);
+							} else {
+								setTimeout(checkECharts, 100);
+							}
+						};
+						checkECharts();
+					});
+				};
+
+				// 安全的图表初始化函数
+				const safeInitChart = async (elementId, initFunction) => {
+					try {
+						// 等待ECharts加载
+						await waitForECharts();
+
+						// 检查DOM元素
+						const element = document.getElementById(elementId);
+						if (!element) {
+							console.error(`DOM元素 ${elementId} 未找到`);
+							return false;
+						}
+
+						// 执行图表初始化
+						initFunction();
+						console.log(`图表 ${elementId} 初始化成功`);
+						return true;
+					} catch (error) {
+						console.error(`图表 ${elementId} 初始化失败:`, error);
+						return false;
+					}
+				};
+
+				// 初始化图表1 - 归档档案/档案利用分析
+				const initChart1 = (data) => {
+					if (!data || data.length === 0) {
+						console.warn('图表1：数据为空，使用默认数据');
+						data = [
+							{ statDate: '2024-07-18', archivedCount: 75, totalBorrows: 45 },
+							{ statDate: '2024-07-19', archivedCount: 82, totalBorrows: 52 },
+							{ statDate: '2024-07-20', archivedCount: 68, totalBorrows: 38 },
+							{ statDate: '2024-07-21', archivedCount: 91, totalBorrows: 67 },
+							{ statDate: '2024-07-22', archivedCount: 77, totalBorrows: 43 },
+							{ statDate: '2024-07-23', archivedCount: 85, totalBorrows: 58 },
+							{ statDate: '2024-07-24', archivedCount: 73, totalBorrows: 41 }
+						];
+					}
+
+					const chart = echarts.init(document.getElementById('echarts_1'));
+
+					const dates = data.map(item => {
+						const date = new Date(item.statDate);
+						return (date.getMonth() + 1) + '-' + date.getDate();
+					});
+
+					const option = {
+						title: {
+							text: '最近7天归档与借出趋势',
+							left: 'center',
+							top: 0,
+							textStyle: {
+								color: '#fff',
+								fontSize: 14
+							}
+						},
+						tooltip: {
+							trigger: 'axis',
+							axisPointer: {
+								type: 'cross'
+							},
+							backgroundColor: 'rgba(0,0,0,0.8)',
+							textStyle: {
+								color: '#fff'
+							}
+						},
+						legend: {
+							data: ['归档数量', '借出数量'],
+							textStyle: {
+								color: '#fff'
+							},
+							top: 18
+						},
+						grid: {
+							left: '3%',
+							right: '4%',
+							bottom: '8%',
+							top: '20%',
+							containLabel: true
+						},
+						xAxis: {
+							type: 'category',
+							data: dates,
+							axisLabel: {
+								color: '#fff'
+							},
+							axisLine: {
+								lineStyle: {
+									color: '#fff'
+								}
+							}
+						},
+						yAxis: {
+							type: 'value',
+							axisLabel: {
+								color: '#fff'
+							},
+							axisLine: {
+								lineStyle: {
+									color: '#fff'
+								}
+							},
+							splitLine: {
+								lineStyle: {
+									color: 'rgba(255,255,255,0.3)'
+								}
+							}
+						},
+						series: [
+							{
+								name: '归档数量',
+								type: 'line',
+								data: data.map(item => item.archivedCount || 0),
+								smooth: true,
+								itemStyle: {
+									color: '#00d4ff'
+								},
+								areaStyle: {
+									color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+										{ offset: 0, color: 'rgba(0, 212, 255, 0.3)' },
+										{ offset: 1, color: 'rgba(0, 212, 255, 0.1)' }
+									])
+								}
+							},
+							{
+								name: '借出数量',
+								type: 'line',
+								data: data.map(item => item.totalBorrows || 0),
+								smooth: true,
+								itemStyle: {
+									color: '#ffa726'
+								},
+								areaStyle: {
+									color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+										{ offset: 0, color: 'rgba(255, 167, 38, 0.3)' },
+										{ offset: 1, color: 'rgba(255, 167, 38, 0.1)' }
+									])
+								}
+							}
+						]
+					};
+
+					chart.setOption(option);
+
+					// 响应式调整
+					window.addEventListener('resize', () => {
+						chart.resize();
+					});
+				};
+
+				// 初始化图表2 - 在馆数/逾期待归还分析
+				const initChart2 = (data) => {
+					if (!data || data.length === 0) {
+						console.warn('图表2：数据为空，使用默认数据');
+						data = [
+							{ statDate: '2024-07-18', archivedCount: 850, totalLoans: 120, totalReturns: 110, totalLost: 15 },
+							{ statDate: '2024-07-19', archivedCount: 860, totalLoans: 125, totalReturns: 115, totalLost: 18 },
+							{ statDate: '2024-07-20', archivedCount: 845, totalLoans: 118, totalReturns: 108, totalLost: 12 },
+							{ statDate: '2024-07-21', archivedCount: 875, totalLoans: 132, totalReturns: 122, totalLost: 20 },
+							{ statDate: '2024-07-22', archivedCount: 855, totalLoans: 128, totalReturns: 118, totalLost: 16 },
+							{ statDate: '2024-07-23', archivedCount: 870, totalLoans: 135, totalReturns: 125, totalLost: 22 },
+							{ statDate: '2024-07-24', archivedCount: 865, totalLoans: 130, totalReturns: 120, totalLost: 19 }
+						];
+					}
+
+					const chart = echarts.init(document.getElementById('echarts_2'));
+
+					const dates = data.map(item => {
+						const date = new Date(item.statDate);
+						return (date.getMonth() + 1) + '-' + date.getDate();
+					});
+
+					const inLibraryData = data.map(item => {
+						return Math.max(0, (item.archivedCount || 0) + (item.pendingCount || 0) - (item.totalBorrows || 0) + (item.totalReturns || 0));
+					});
+
+					const option = {
+						title: {
+							text: '最近7天在馆数与逾期数据',
+							left: 'center',
+							top: 0,
+							textStyle: {
+								color: '#fff',
+								fontSize: 14
+							}
+						},
+						tooltip: {
+							trigger: 'axis',
+							axisPointer: {
+								type: 'shadow'
+							},
+							backgroundColor: 'rgba(0,0,0,0.8)',
+							textStyle: {
+								color: '#fff'
+							}
+						},
+						legend: {
+							data: ['在馆数量', '逾期待归还'],
+							textStyle: {
+								color: '#fff'
+							},
+							top: 18
+						},
+						grid: {
+							left: '3%',
+							right: '4%',
+							bottom: '8%',
+							top: '20%',
+							containLabel: true
+						},
+						xAxis: {
+							type: 'category',
+							data: dates,
+							axisLabel: {
+								color: '#fff'
+							},
+							axisLine: {
+								lineStyle: {
+									color: '#fff'
+								}
+							}
+						},
+						yAxis: {
+							type: 'value',
+							axisLabel: {
+								color: '#fff'
+							},
+							axisLine: {
+								lineStyle: {
+									color: '#fff'
+								}
+							},
+							splitLine: {
+								lineStyle: {
+									color: 'rgba(255,255,255,0.3)'
+								}
+							}
+						},
+						series: [
+							{
+								name: '在馆数量',
+								type: 'bar',
+								data: inLibraryData,
+								itemStyle: {
+									color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+										{ offset: 0, color: '#00d4ff' },
+										{ offset: 1, color: '#0066cc' }
+									])
+								}
+							},
+							{
+								name: '逾期待归还',
+								type: 'bar',
+								data: data.map(item => item.totalLost || 0),
+								itemStyle: {
+									color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+										{ offset: 0, color: '#ff6b6b' },
+										{ offset: 1, color: '#cc0000' }
+									])
+								}
+							}
+						]
+					};
+
+					chart.setOption(option);
+
+					window.addEventListener('resize', () => {
+						chart.resize();
+					});
+				};
+
+				// 初始化图表3 - 实时客流分析
+				const initChart3 = () => {
+					const chart = echarts.init(document.getElementById('echarts_3'));
+
+					const option = {
+						grid: {
+							left: '4%',
+							right: '4%',
+							bottom: '4%',
+							top: '4%',
+							containLabel: true
+						},
+						tooltip: {
+							trigger: 'axis',
+							backgroundColor: 'rgba(0,0,0,0.8)',
+							textStyle: {
+								color: '#fff'
+							}
+						},
+						xAxis: {
+							type: 'category',
+							data: ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00'],
+							axisLabel: {
+								color: '#fff'
+							},
+							axisLine: {
+								lineStyle: {
+									color: '#fff'
+								}
+							}
+						},
+						yAxis: {
+							type: 'value',
+							axisLabel: {
+								color: '#fff'
+							},
+							axisLine: {
+								lineStyle: {
+									color: '#fff'
+								}
+							},
+							splitLine: {
+								lineStyle: {
+									color: 'rgba(255,255,255,0.3)'
+								}
+							}
+						},
+						series: [{
+							data: [23, 45, 67, 89, 76, 54, 32],
+							type: 'line',
+							smooth: true,
+							itemStyle: {
+								color: '#00d4ff'
+							},
+							areaStyle: {
+								color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+									{ offset: 0, color: 'rgba(0, 212, 255, 0.3)' },
+									{ offset: 1, color: 'rgba(0, 212, 255, 0.1)' }
+								])
+							}
+						}]
+					};
+
+					chart.setOption(option);
+
+					window.addEventListener('resize', () => {
+						chart.resize();
+					});
+				};
+
+				// 初始化图表4 - 档案构成情况分析
+				const initChart4 = (electronicCount, physicalCount) => {
+					const chart = echarts.init(document.getElementById('echarts_4'));
+
+					electronicCount = electronicCount || 45678;
+					physicalCount = physicalCount || 50549;
+
+					const option = {
+						title: {
+							text: '档案类型分布',
+							left: 'center',
+							top: 0,
+							textStyle: {
+								color: '#fff',
+								fontSize: 12
+							}
+						},
+						tooltip: {
+							trigger: 'item',
+							formatter: '{a} <br/>{b}: {c} ({d}%)',
+							backgroundColor: 'rgba(0,0,0,0.8)',
+							textStyle: {
+								color: '#fff'
+							}
+						},
+						legend: {
+							bottom: 5,
+							left: 'center',
+							textStyle: {
+								color: '#fff',
+								fontSize: 10
+							}
+						},
+						series: [
+							{
+								name: '档案类型',
+								type: 'pie',
+								radius: ['30%', '60%'],
+								center: ['50%', '40%'],
+								avoidLabelOverlap: false,
+								itemStyle: {
+									borderRadius: 8,
+									borderColor: '#fff',
+									borderWidth: 1
+								},
+								label: {
+									show: false,
+									position: 'center'
+								},
+								emphasis: {
+									label: {
+										show: true,
+										fontSize: '14',
+										fontWeight: 'bold',
+										color: '#fff'
+									}
+								},
+								labelLine: {
+									show: false
+								},
+								data: [
+									{
+										value: electronicCount,
+										name: '电子档案',
+										itemStyle: {
+											color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+												{ offset: 0, color: '#00d4ff' },
+												{ offset: 1, color: '#0066cc' }
+											])
+										}
+									},
+									{
+										value: physicalCount,
+										name: '实体档案',
+										itemStyle: {
+											color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+												{ offset: 0, color: '#ffa726' },
+												{ offset: 1, color: '#ff6600' }
+											])
+										}
+									}
+								]
+							}
+						]
+					};
+
+					chart.setOption(option);
+
+					window.addEventListener('resize', () => {
+						chart.resize();
+					});
+				};
+
+				// 初始化数据加载
+				const loadData = async () => {
+					try {
+						showMessage('开始加载数据...', 'info');
+
+						const [statsData, recent7Days, borrowRecordsData] = await Promise.all([
+							getLatestStatistics(),
+							getRecent7DaysData(),
+							getBorrowRecords()
+						]);
+
+						if (statsData) {
+							statistics.value = { ...statistics.value, ...statsData };
+							showMessage('统计数据加载成功', 'success');
+						}
+
+						if (recent7Days && recent7Days.length > 0) {
+							recent7DaysData.value = recent7Days;
+							showMessage('趋势数据加载成功', 'success');
+						} else {
+							showMessage('趋势数据为空，将使用默认数据', 'warning');
+						}
+
+						if (borrowRecordsData && borrowRecordsData.length > 0) {
+							borrowRecords.value = borrowRecordsData;
+							showMessage('借阅记录加载成功', 'success');
+						} else {
+							showMessage('借阅记录为空', 'warning');
+						}
+
+						await nextTick();
+
+						console.log('开始初始化图表...');
+
+						const results = await Promise.all([
+							safeInitChart('echarts_1', () => initChart1(recent7Days)),
+							safeInitChart('echarts_2', () => initChart2(recent7Days)),
+							safeInitChart('echarts_3', () => initChart3()),
+							safeInitChart('echarts_4', () => initChart4(statistics.value.electronicCount, statistics.value.physicalCount))
+						]);
+
+						const successCount = results.filter(r => r).length;
+						showMessage(`图表初始化完成，成功: ${successCount}/4`, successCount === 4 ? 'success' : 'warning');
+
+					} catch (error) {
+						console.error('数据加载失败:', error);
+						showMessage('数据加载失败，请检查网络连接', 'error');
+					}
+				};
+
+				onMounted(() => {
+					console.log('组件已挂载，开始初始化...');
+
+					setTimeout(() => {
+						loadData();
+					}, 500); // 增加延迟确保所有依赖已加载
+
+					// 定时刷新数据（每30分钟）
+					const refreshInterval = setInterval(() => {
+						console.log('定时刷新数据...');
+						loadData();
+					}, 30 * 60 * 1000);
+
+					onUnmounted(() => {
+						clearInterval(refreshInterval);
+					});
+				});
+
+				return {
+					statistics,
+					archiveOnShelf,
+					borrowRecords, // 暴露给模板使用
+					loading,
+					getStatusStyle // 暴露给模板使用
+				};
+			}
+		}).mount('#app');
+
+		// 时间更新功能
+		let swiper;
+
+		if (typeof Swiper !== 'undefined') {
+			try {
+				swiper = new Swiper('.swiper-container', {
+					pagination: '.swiper-pagination',
+					loop: true,
+					autoplay: 3000,
+					centeredSlides: true,
+					slidesPerView: '2',
+					effect: 'coverflow',
+					coverflow: {
+						rotate: 0,
+						stretch: 50,
+						depth: 100,
+						modifier: 1,
+						slideShadows: false
+					}
+				});
+			} catch (error) {
+				console.warn('Swiper初始化失败:', error);
+			}
+		}
+
+		function getCurDate() {
+			try {
+				var date = new Date()
+				var y = date.getFullYear();
+				var m = date.getMonth() + 1;
+				var d = date.getDate();
+				var h = date.getHours();
+				var min = date.getMinutes();
+				var s = date.getSeconds();
+				s = s < 10 ? "0" + s : s;
+				min = min < 10 ? "0" + min : min;
+
+				const timeElement = document.getElementById("time");
+				if (timeElement) {
+					timeElement.innerHTML = y + "-" + m + "-" + d + " " + h + ":" + min + ":" + s;
+				}
+			} catch (error) {
+				console.warn('时间更新失败:', error);
+			}
+		}
+
+		window.onload = function () {
+			getCurDate();
+		}
+
+		setInterval(getCurDate, 1000);
+	</script>
+</body>
+
+</html>

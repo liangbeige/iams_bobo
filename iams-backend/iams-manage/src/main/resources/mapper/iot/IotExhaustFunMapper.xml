@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.iot.IotExhaustFunMapper">
+
+    <resultMap type="IotExhaustFun" id="IotExhaustFunResult">
+        <result property="deviceId"    column="device_id"    />
+        <result property="manufacturer"    column="manufacturer"    />
+        <result property="model"    column="model"    />
+        <result property="location"    column="location"    />
+        <result property="installDate"    column="install_date"    />
+        <result property="powerRating"    column="power_rating"    />
+        <result property="airflowCapacity"    column="airflow_capacity"    />
+        <result property="fireproofLevel"    column="fireproof_level"    />
+    </resultMap>
+
+    <sql id="selectIotExhaustFunVo">
+        select device_id, manufacturer, model, location, install_date, power_rating, airflow_capacity, fireproof_level from iot_exhaust_fun
+    </sql>
+
+    <select id="selectIotExhaustFunList" parameterType="IotExhaustFun" resultMap="IotExhaustFunResult">
+        <include refid="selectIotExhaustFunVo"/>
+        <where>
+            <if test="manufacturer != null  and manufacturer != ''"> and manufacturer like concat('%', #{manufacturer}, '%')</if>
+            <if test="model != null  and model != ''"> and model like concat('%', #{model}, '%')</if>
+            <if test="location != null  and location != ''"> and location like concat('%', #{location}, '%')</if>
+            <if test="powerRating != null "> and power_rating = #{powerRating}</if>
+            <if test="airflowCapacity != null "> and airflow_capacity = #{airflowCapacity}</if>
+            <if test="fireproofLevel != null  and fireproofLevel != ''"> and fireproof_level like concat('%', #{fireproofLevel}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectIotExhaustFunByDeviceId" parameterType="String" resultMap="IotExhaustFunResult">
+        <include refid="selectIotExhaustFunVo"/>
+        where device_id = #{deviceId}
+    </select>
+
+    <insert id="insertIotExhaustFun" parameterType="IotExhaustFun">
+        insert into iot_exhaust_fun
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null">device_id,</if>
+            <if test="manufacturer != null and manufacturer != ''">manufacturer,</if>
+            <if test="model != null and model != ''">model,</if>
+            <if test="location != null and location != ''">location,</if>
+            <if test="installDate != null">install_date,</if>
+            <if test="powerRating != null">power_rating,</if>
+            <if test="airflowCapacity != null">airflow_capacity,</if>
+            <if test="fireproofLevel != null">fireproof_level,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null">#{deviceId},</if>
+            <if test="manufacturer != null and manufacturer != ''">#{manufacturer},</if>
+            <if test="model != null and model != ''">#{model},</if>
+            <if test="location != null and location != ''">#{location},</if>
+            <if test="installDate != null">#{installDate},</if>
+            <if test="powerRating != null">#{powerRating},</if>
+            <if test="airflowCapacity != null">#{airflowCapacity},</if>
+            <if test="fireproofLevel != null">#{fireproofLevel},</if>
+         </trim>
+    </insert>
+
+    <update id="updateIotExhaustFun" parameterType="IotExhaustFun">
+        update iot_exhaust_fun
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="manufacturer != null and manufacturer != ''">manufacturer = #{manufacturer},</if>
+            <if test="model != null and model != ''">model = #{model},</if>
+            <if test="location != null and location != ''">location = #{location},</if>
+            <if test="installDate != null">install_date = #{installDate},</if>
+            <if test="powerRating != null">power_rating = #{powerRating},</if>
+            <if test="airflowCapacity != null">airflow_capacity = #{airflowCapacity},</if>
+            <if test="fireproofLevel != null">fireproof_level = #{fireproofLevel},</if>
+        </trim>
+        where device_id = #{deviceId}
+    </update>
+
+    <delete id="deleteIotExhaustFunByDeviceId" parameterType="String">
+        delete from iot_exhaust_fun where device_id = #{deviceId}
+    </delete>
+
+    <delete id="deleteIotExhaustFunByDeviceIds" parameterType="String">
+        delete from iot_exhaust_fun where device_id in
+        <foreach item="deviceId" collection="array" open="(" separator="," close=")">
+            #{deviceId}
+        </foreach>
+    </delete>
+
+    <select id="getTopicById" resultType="java.lang.String">
+        SELECT s.mqtt_topic
+        FROM iot_exhaust_fun e
+                 JOIN iot_sensor s ON e.device_id = s.sensor_id
+        WHERE e.device_id = #{id}
+    </select>
+
+    <select id="selectLastIotExhaustFun" resultMap="IotExhaustFunResult">
+        <include refid="selectIotExhaustFunVo"/>
+        ORDER BY device_id DESC
+        LIMIT 1
+    </select>
+
+</mapper>

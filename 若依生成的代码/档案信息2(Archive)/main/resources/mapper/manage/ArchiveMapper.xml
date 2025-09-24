@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.ArchiveMapper">
+    
+    <resultMap type="Archive" id="ArchiveResult">
+        <result property="id"    column="id"    />
+        <result property="danghao"    column="danghao"    />
+        <result property="name"    column="name"    />
+        <result property="rfid"    column="rfid"    />
+        <result property="jianhao"    column="jianhao"    />
+        <result property="secretLevel"    column="secret_level"    />
+        <result property="secretPeroid"    column="secret_peroid"    />
+        <result property="desecretDate"    column="desecret_date"    />
+        <result property="retentionPeriod"    column="retention_period"    />
+        <result property="carrierType"    column="carrier_type"    />
+        <result property="startDate"    column="start_date"    />
+        <result property="endDate"    column="end_date"    />
+        <result property="guidangTime"    column="guidang_time"    />
+        <result property="shitiLocation"    column="shiti_location"    />
+        <result property="dianziLocation"    column="dianzi_location"    />
+        <result property="directory"    column="directory"    />
+        <result property="description"    column="description"    />
+        <result property="formationUnit"    column="formation_unit"    />
+        <result property="transferUnit"    column="transfer_unit"    />
+        <result property="documentCount"    column="document_count"    />
+        <result property="status"    column="status"    />
+        <result property="authenticity"    column="authenticity"    />
+        <result property="integrity"    column="integrity"    />
+        <result property="availability"    column="availability"    />
+        <result property="security"    column="security"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="fondsId"    column="fonds_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectArchiveVo">
+        select id, danghao, name, rfid, jianhao, secret_level, secret_peroid, desecret_date, retention_period, carrier_type, start_date, end_date, guidang_time, shiti_location, dianzi_location, directory, description, formation_unit, transfer_unit, document_count, status, authenticity, integrity, availability, security, category_id, fonds_id, create_time, create_by, update_time, update_by, remark from tb_archive
+    </sql>
+
+    <select id="selectArchiveList" parameterType="Archive" resultMap="ArchiveResult">
+        <include refid="selectArchiveVo"/>
+        <where>  
+            <if test="danghao != null  and danghao != ''"> and danghao like concat('%', #{danghao}, '%')</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="rfid != null  and rfid != ''"> and rfid = #{rfid}</if>
+            <if test="secretLevel != null  and secretLevel != ''"> and secret_level = #{secretLevel}</if>
+            <if test="secretPeroid != null  and secretPeroid != ''"> and secret_peroid = #{secretPeroid}</if>
+            <if test="retentionPeriod != null  and retentionPeriod != ''"> and retention_period = #{retentionPeriod}</if>
+            <if test="carrierType != null  and carrierType != ''"> and carrier_type = #{carrierType}</if>
+            <if test="guidangTime != null "> and guidang_time = #{guidangTime}</if>
+            <if test="directory != null  and directory != ''"> and directory = #{directory}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="categoryId != null "> and category_id = #{categoryId}</if>
+            <if test="fondsId != null "> and fonds_id = #{fondsId}</if>
+        </where>
+    </select>
+    
+    <select id="selectArchiveById" parameterType="Long" resultMap="ArchiveResult">
+        <include refid="selectArchiveVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertArchive" parameterType="Archive" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_archive
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="danghao != null">danghao,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="rfid != null">rfid,</if>
+            <if test="jianhao != null">jianhao,</if>
+            <if test="secretLevel != null">secret_level,</if>
+            <if test="secretPeroid != null">secret_peroid,</if>
+            <if test="desecretDate != null">desecret_date,</if>
+            <if test="retentionPeriod != null">retention_period,</if>
+            <if test="carrierType != null">carrier_type,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="endDate != null">end_date,</if>
+            <if test="guidangTime != null">guidang_time,</if>
+            <if test="shitiLocation != null">shiti_location,</if>
+            <if test="dianziLocation != null">dianzi_location,</if>
+            <if test="directory != null">directory,</if>
+            <if test="description != null">description,</if>
+            <if test="formationUnit != null">formation_unit,</if>
+            <if test="transferUnit != null">transfer_unit,</if>
+            <if test="documentCount != null">document_count,</if>
+            <if test="status != null">status,</if>
+            <if test="authenticity != null">authenticity,</if>
+            <if test="integrity != null">integrity,</if>
+            <if test="availability != null">availability,</if>
+            <if test="security != null">security,</if>
+            <if test="categoryId != null">category_id,</if>
+            <if test="fondsId != null">fonds_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="danghao != null">#{danghao},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="rfid != null">#{rfid},</if>
+            <if test="jianhao != null">#{jianhao},</if>
+            <if test="secretLevel != null">#{secretLevel},</if>
+            <if test="secretPeroid != null">#{secretPeroid},</if>
+            <if test="desecretDate != null">#{desecretDate},</if>
+            <if test="retentionPeriod != null">#{retentionPeriod},</if>
+            <if test="carrierType != null">#{carrierType},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="endDate != null">#{endDate},</if>
+            <if test="guidangTime != null">#{guidangTime},</if>
+            <if test="shitiLocation != null">#{shitiLocation},</if>
+            <if test="dianziLocation != null">#{dianziLocation},</if>
+            <if test="directory != null">#{directory},</if>
+            <if test="description != null">#{description},</if>
+            <if test="formationUnit != null">#{formationUnit},</if>
+            <if test="transferUnit != null">#{transferUnit},</if>
+            <if test="documentCount != null">#{documentCount},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authenticity != null">#{authenticity},</if>
+            <if test="integrity != null">#{integrity},</if>
+            <if test="availability != null">#{availability},</if>
+            <if test="security != null">#{security},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="fondsId != null">#{fondsId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateArchive" parameterType="Archive">
+        update tb_archive
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="danghao != null">danghao = #{danghao},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="rfid != null">rfid = #{rfid},</if>
+            <if test="jianhao != null">jianhao = #{jianhao},</if>
+            <if test="secretLevel != null">secret_level = #{secretLevel},</if>
+            <if test="secretPeroid != null">secret_peroid = #{secretPeroid},</if>
+            <if test="desecretDate != null">desecret_date = #{desecretDate},</if>
+            <if test="retentionPeriod != null">retention_period = #{retentionPeriod},</if>
+            <if test="carrierType != null">carrier_type = #{carrierType},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="guidangTime != null">guidang_time = #{guidangTime},</if>
+            <if test="shitiLocation != null">shiti_location = #{shitiLocation},</if>
+            <if test="dianziLocation != null">dianzi_location = #{dianziLocation},</if>
+            <if test="directory != null">directory = CAST(#{directory} AS json),</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="formationUnit != null">formation_unit = #{formationUnit},</if>
+            <if test="transferUnit != null">transfer_unit = #{transferUnit},</if>
+            <if test="documentCount != null">document_count = #{documentCount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authenticity != null">authenticity = #{authenticity},</if>
+            <if test="integrity != null">integrity = #{integrity},</if>
+            <if test="availability != null">availability = #{availability},</if>
+            <if test="security != null">security = #{security},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="fondsId != null">fonds_id = #{fondsId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveById" parameterType="Long">
+        delete from tb_archive where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveByIds" parameterType="String">
+        delete from tb_archive where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

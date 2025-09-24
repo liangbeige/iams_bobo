@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.FondsMapper">
+    
+    <resultMap type="Fonds" id="FondsResult">
+        <result property="id"    column="id"    />
+        <result property="bianhao"    column="bianhao"    />
+        <result property="name"    column="name"    />
+        <result property="startDate"    column="start_date"    />
+        <result property="endDate"    column="end_date"    />
+        <result property="description"    column="description"    />
+        <result property="formationUnit"    column="formation_unit"    />
+        <result property="transferUnit"    column="transfer_unit"    />
+        <result property="retentionPeriod"    column="retention_period"    />
+        <result property="archiveCount"    column="archive_count"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+         <result property="categoryCodes" column="category_codes" />
+    </resultMap>
+
+    <sql id="selectFondsVo">
+        select id, bianhao, name, start_date, end_date, description, formation_unit, transfer_unit, retention_period, archive_count, status, create_time, create_by, update_time, update_by, remark,category_codes from tb_fonds
+    </sql>
+
+    <select id="selectFondsList" parameterType="Fonds" resultMap="FondsResult">
+        <include refid="selectFondsVo"/>
+        <where>  
+            <if test="bianhao != null  and bianhao != ''"> AND bianhao LIKE CONCAT('%', #{bianhao}, '%')</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="retentionPeriod != null  and retentionPeriod != ''"> and retention_period = #{retentionPeriod}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+        order by start_date desc
+    </select>
+    
+    <select id="selectFondsById" parameterType="Long" resultMap="FondsResult">
+        <include refid="selectFondsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertFonds" parameterType="Fonds" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_fonds
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="bianhao != null and bianhao != ''">bianhao,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="endDate != null">end_date,</if>
+            <if test="description != null">description,</if>
+            <if test="formationUnit != null">formation_unit,</if>
+            <if test="transferUnit != null">transfer_unit,</if>
+            <if test="retentionPeriod != null">retention_period,</if>
+            <if test="archiveCount != null">archive_count,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="bianhao != null and bianhao != ''">#{bianhao},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="endDate != null">#{endDate},</if>
+            <if test="description != null">#{description},</if>
+            <if test="formationUnit != null">#{formationUnit},</if>
+            <if test="transferUnit != null">#{transferUnit},</if>
+            <if test="retentionPeriod != null">#{retentionPeriod},</if>
+            <if test="archiveCount != null">#{archiveCount},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFonds" parameterType="Fonds">
+        update tb_fonds
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="bianhao != null and bianhao != ''">bianhao = #{bianhao},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="formationUnit != null">formation_unit = #{formationUnit},</if>
+            <if test="transferUnit != null">transfer_unit = #{transferUnit},</if>
+            <if test="retentionPeriod != null">retention_period = #{retentionPeriod},</if>
+            <if test="archiveCount != null">archive_count = #{archiveCount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="categoryCodes != null">category_codes = #{categoryCodes},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFondsById" parameterType="Long">
+        delete from tb_fonds where id = #{id}
+    </delete>
+
+    <delete id="deleteFondsByIds" parameterType="String">
+        delete from tb_fonds where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 统计指定全宗下的档案数量 -->
+    <select id="countArchivesByFondsId" parameterType="Long" resultType="Long">
+        select count(*) from tb_archive where fonds_id = #{fondsId}
+    </select>
+
+    <!-- 批量更新所有全宗的档案数量 -->
+    <update id="updateAllFondsArchiveCount">
+        UPDATE tb_fonds
+        SET archive_count = (
+            SELECT COALESCE(COUNT(*), 0)
+            FROM tb_archive
+            WHERE tb_archive.fonds_id = tb_fonds.id
+        )
+    </update>
+
+    <!-- 更新指定全宗的档案数量 -->
+    <update id="updateFondsArchiveCount" parameterType="Long">
+        UPDATE tb_fonds
+        SET archive_count = (
+            SELECT COALESCE(COUNT(*), 0)
+            FROM tb_archive
+            WHERE fonds_id = #{fondsId}
+        )
+        WHERE id = #{fondsId}
+    </update>
+</mapper>

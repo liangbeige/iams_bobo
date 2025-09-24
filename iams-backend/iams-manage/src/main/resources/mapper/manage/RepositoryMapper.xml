@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.RepositoryMapper">
+    
+    <resultMap type="Repository" id="RepositoryResult">
+        <result property="id"    column="id"    />
+        <result property="bianhao"    column="bianhao"    />
+        <result property="name"    column="name"    />
+        <result property="cabinetCount"    column="cabinet_count"    />
+        <result property="rowCount"    column="row_count"    />
+        <result property="columnCount"    column="column_count"    />
+        <result property="archiveCount"    column="archive_count"    />
+        <result property="temperature"    column="temperature"    />
+        <result property="moisture"    column="moisture"    />
+        <result property="particles"    column="particles"    />
+        <result property="oxygen"    column="oxygen"    />
+        <result property="waterlogging"    column="waterlogging"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectRepositoryVo">
+        select id, bianhao, name, cabinet_count, row_count, column_count, archive_count, temperature, moisture, particles, oxygen, waterlogging, create_time, create_by, update_time, update_by, remark from tb_repository
+    </sql>
+
+    <select id="selectRepositoryList" parameterType="Repository" resultMap="RepositoryResult">
+        <include refid="selectRepositoryVo"/>
+        <where>  
+            <if test="bianhao != null  and bianhao != ''"> and bianhao = #{bianhao}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectRepositoryById" parameterType="Long" resultMap="RepositoryResult">
+        <include refid="selectRepositoryVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertRepository" parameterType="Repository" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_repository
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="bianhao != null and bianhao != ''">bianhao,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="cabinetCount != null">cabinet_count,</if>
+            <if test="rowCount != null">row_count,</if>
+            <if test="columnCount != null">column_count,</if>
+            <if test="archiveCount != null">archive_count,</if>
+            <if test="temperature != null">temperature,</if>
+            <if test="moisture != null">moisture,</if>
+            <if test="particles != null">particles,</if>
+            <if test="oxygen != null">oxygen,</if>
+            <if test="waterlogging != null">waterlogging,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="bianhao != null and bianhao != ''">#{bianhao},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="cabinetCount != null">#{cabinetCount},</if>
+            <if test="rowCount != null">#{rowCount},</if>
+            <if test="columnCount != null">#{columnCount},</if>
+            <if test="archiveCount != null">#{archiveCount},</if>
+            <if test="temperature != null">#{temperature},</if>
+            <if test="moisture != null">#{moisture},</if>
+            <if test="particles != null">#{particles},</if>
+            <if test="oxygen != null">#{oxygen},</if>
+            <if test="waterlogging != null">#{waterlogging},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRepository" parameterType="Repository">
+        update tb_repository
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="bianhao != null and bianhao != ''">bianhao = #{bianhao},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="cabinetCount != null">cabinet_count = #{cabinetCount},</if>
+            <if test="rowCount != null">row_count = #{rowCount},</if>
+            <if test="columnCount != null">column_count = #{columnCount},</if>
+            <if test="archiveCount != null">archive_count = #{archiveCount},</if>
+            <if test="temperature != null">temperature = #{temperature},</if>
+            <if test="moisture != null">moisture = #{moisture},</if>
+            <if test="particles != null">particles = #{particles},</if>
+            <if test="oxygen != null">oxygen = #{oxygen},</if>
+            <if test="waterlogging != null">waterlogging = #{waterlogging},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRepositoryById" parameterType="Long">
+        delete from tb_repository where id = #{id}
+    </delete>
+
+    <delete id="deleteRepositoryByIds" parameterType="String">
+        delete from tb_repository where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

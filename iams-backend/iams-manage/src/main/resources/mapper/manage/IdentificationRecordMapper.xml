@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.IdentificationRecordMapper">
+
+    <resultMap type="IdentificationRecord" id="IdentificationRecordResult">
+        <result property="id"    column="id"    />
+        <result property="archiveId"    column="archive_id"    />
+        <result property="danghao"    column="danghao"    />
+        <result property="archiveName"    column="archive_name"    />
+        <result property="appraiser"    column="appraiser"    />
+        <result property="appraisalTime"    column="appraisal_time"    />
+        <result property="beforeRetentionPeriod"    column="before_retention_period"    />
+        <result property="beforeSecretLevel"    column="before_secret_level"    />
+        <result property="beforeSecretPeriod"    column="before_secret_period"    />
+        <result property="afterRetentionPeriod"    column="after_retention_period"    />
+        <result property="afterSecretLevel"    column="after_secret_level"    />
+        <result property="afterSecretPeriod"    column="after_secret_period"    />
+        <result property="appraisalResult"    column="appraisal_result"    />
+        <result property="appraisalReason"    column="appraisal_reason"    />
+        <result property="purpose"    column="purpose"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+    </resultMap>
+
+    <sql id="selectIdentificationRecordVo">
+        select id, archive_id, danghao, archive_name, appraiser, appraisal_time,
+               before_retention_period, before_secret_level, before_secret_period,
+               after_retention_period, after_secret_level, after_secret_period,
+               appraisal_result, appraisal_reason, purpose,
+               create_time, create_by, update_time, update_by
+        from tb_identification_record
+    </sql>
+
+    <select id="selectIdentificationRecordList" parameterType="IdentificationRecord" resultMap="IdentificationRecordResult">
+        <include refid="selectIdentificationRecordVo"/>
+        <where>
+            <if test="archiveId != null "> and archive_id = #{archiveId}</if>
+            <if test="danghao != null and danghao != ''"> and danghao like concat('%', #{danghao}, '%')</if>
+            <if test="archiveName != null and archiveName != ''"> and archive_name like concat('%', #{archiveName}, '%')</if>
+            <if test="appraiser != null and appraiser != ''"> and appraiser like concat('%', #{appraiser}, '%')</if>
+            <if test="appraisalResult != null and appraisalResult != ''"> and appraisal_result = #{appraisalResult}</if>
+            <if test="purpose != null and purpose != ''"> and purpose like concat('%', #{purpose}, '%')</if>
+            <!-- 开始鉴定时间 结束鉴定时间-->
+            <if test="beginAppraisalTime != null and endAppraisalTime != null">
+                AND appraisal_time BETWEEN #{beginAppraisalTime, jdbcType=TIMESTAMP} AND #{endAppraisalTime, jdbcType=TIMESTAMP}
+            </if>
+        </where>
+        order by appraisal_time desc
+    </select>
+
+    <select id="selectIdentificationRecordById" parameterType="Long" resultMap="IdentificationRecordResult">
+        <include refid="selectIdentificationRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectIdentificationRecordByArchiveId" parameterType="Long" resultMap="IdentificationRecordResult">
+        <include refid="selectIdentificationRecordVo"/>
+        where archive_id = #{archiveId}
+        order by appraisal_time desc
+    </select>
+
+    <insert id="insertIdentificationRecord" parameterType="IdentificationRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_identification_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">archive_id,</if>
+            <if test="danghao != null">danghao,</if>
+            <if test="archiveName != null">archive_name,</if>
+            <if test="appraiser != null">appraiser,</if>
+            <if test="appraisalTime != null">appraisal_time,</if>
+            <if test="beforeRetentionPeriod != null">before_retention_period,</if>
+            <if test="beforeSecretLevel != null">before_secret_level,</if>
+            <if test="beforeSecretPeriod != null">before_secret_period,</if>
+            <if test="afterRetentionPeriod != null">after_retention_period,</if>
+            <if test="afterSecretLevel != null">after_secret_level,</if>
+            <if test="afterSecretPeriod != null">after_secret_period,</if>
+            <if test="appraisalResult != null">appraisal_result,</if>
+            <if test="appraisalReason != null">appraisal_reason,</if>
+            <if test="purpose != null">purpose,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="danghao != null">#{danghao},</if>
+            <if test="archiveName != null">#{archiveName},</if>
+            <if test="appraiser != null">#{appraiser},</if>
+            <if test="appraisalTime != null">#{appraisalTime},</if>
+            <if test="beforeRetentionPeriod != null">#{beforeRetentionPeriod},</if>
+            <if test="beforeSecretLevel != null">#{beforeSecretLevel},</if>
+            <if test="beforeSecretPeriod != null">#{beforeSecretPeriod},</if>
+            <if test="afterRetentionPeriod != null">#{afterRetentionPeriod},</if>
+            <if test="afterSecretLevel != null">#{afterSecretLevel},</if>
+            <if test="afterSecretPeriod != null">#{afterSecretPeriod},</if>
+            <if test="appraisalResult != null">#{appraisalResult},</if>
+            <if test="appraisalReason != null">#{appraisalReason},</if>
+            <if test="purpose != null">#{purpose},</if>
+            <if test="createBy != null">#{createBy},</if>
+            CURRENT_TIMESTAMP,
+        </trim>
+    </insert>
+
+    <update id="updateIdentificationRecord" parameterType="IdentificationRecord">
+        update tb_identification_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="danghao != null">danghao = #{danghao},</if>
+            <if test="archiveName != null">archive_name = #{archiveName},</if>
+            <if test="appraiser != null">appraiser = #{appraiser},</if>
+            <if test="appraisalTime != null">appraisal_time = #{appraisalTime},</if>
+            <if test="beforeRetentionPeriod != null">before_retention_period = #{beforeRetentionPeriod},</if>
+            <if test="beforeSecretLevel != null">before_secret_level = #{beforeSecretLevel},</if>
+            <if test="beforeSecretPeriod != null">before_secret_period = #{beforeSecretPeriod},</if>
+            <if test="afterRetentionPeriod != null">after_retention_period = #{afterRetentionPeriod},</if>
+            <if test="afterSecretLevel != null">after_secret_level = #{afterSecretLevel},</if>
+            <if test="afterSecretPeriod != null">after_secret_period = #{afterSecretPeriod},</if>
+            <if test="appraisalResult != null">appraisal_result = #{appraisalResult},</if>
+            <if test="appraisalReason != null">appraisal_reason = #{appraisalReason},</if>
+            <if test="purpose != null">purpose = #{purpose},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = CURRENT_TIMESTAMP,
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteIdentificationRecordById" parameterType="Long">
+        delete from tb_identification_record where id = #{id}
+    </delete>
+
+    <delete id="deleteIdentificationRecordByIds" parameterType="String">
+        delete from tb_identification_record where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 统计相关查询 -->
+    <select id="selectAppraisalStatistics" resultType="java.util.HashMap">
+        select
+        appraisal_result as result,
+        count(*) as count
+        from tb_identification_record
+        <where>
+            <if test="beginTime != null and beginTime != ''">
+                and appraisal_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and appraisal_time &lt;= #{endTime}
+            </if>
+        </where>
+        group by appraisal_result
+    </select>
+
+    <select id="selectMonthlyAppraisalCount" resultType="java.util.HashMap">
+        select
+            to_char(appraisal_time, 'YYYY-MM') as month,
+            count(*) as count
+        from tb_identification_record
+        where appraisal_time >= CURRENT_DATE - INTERVAL '12 months'
+        group by to_char(appraisal_time, 'YYYY-MM')
+        order by month
+    </select>
+
+</mapper>

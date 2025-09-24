@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.iams.manage.mapper.CompartmentMapper">
+
+    <resultMap id="CompartmentResult" type="Compartment">
+        <id property="id" column="id"/>
+        <result property="bianhao" column="bianhao"/>
+        <result property="name" column="name"/>
+        <result property="cabinetId" column="cabinet_id"/>
+        <result property="leNo" column="le_no"/>
+        <result property="divNo" column="div_no"/>
+        <result property="capacity" column="capacity"/>
+        <result property="size" column="size"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectCompartmentVo">
+        SELECT
+            id, bianhao,name, cabinet_id, le_no, div_no, capacity, size,
+            create_by, update_by, create_time, update_time
+        FROM tb_compartment
+    </sql>
+
+    <!-- 查询档案柜分区列表 -->
+    <select id="selectCompartmentList" parameterType="Compartment" resultMap="CompartmentResult">
+        <include refid="selectCompartmentVo"/>
+        <where>
+            <if test="bianhao != null and bianhao != ''"> AND bianhao LIKE CONCAT('%', #{bianhao}, '%')</if>
+            <if test="name != null and name != ''"> AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="cabinetId != null"> AND cabinet_id = #{cabinetId} </if>
+            <if test="leNo != null"> AND le_no = #{leNo} </if>
+            <if test="divNo != null"> AND div_no = #{divNo} </if>
+        </where>
+        ORDER BY id
+    </select>
+
+    <!-- 根据ID查询档案柜分区 -->
+    <select id="selectCompartmentById" parameterType="Long" resultMap="CompartmentResult">
+        <include refid="selectCompartmentVo"/>
+        WHERE id = #{id}
+        ORDER BY id
+    </select>
+
+    <!-- 新增档案柜分区 -->
+    <insert id="insertCompartment" parameterType="com.iams.manage.domain.Compartment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO compartment (
+            bianhao, name, cabinet_id, le_no, div_no, capacity, size,
+            create_by, create_time
+        ) VALUES (
+                     #{bianhao}, #{name}, #{cabinetId}, #{leNo}, #{divNo}, #{capacity}, #{size},
+                     #{createBy}, #{createTime}
+                 )
+    </insert>
+
+    <!-- 修改档案柜分区 -->
+    <update id="updateCompartment" parameterType="Compartment">
+        UPDATE tb_compartment
+        <set>
+            <if test="bianhao != null">bianhao = #{bianhao},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="cabinetId != null">cabinet_id = #{cabinetId},</if>
+            <if test="leNo != null">le_no = #{leNo},</if>
+            <if test="divNo != null">div_no = #{divNo},</if>
+            <if test="capacity != null">capacity = #{capacity},</if>
+            <if test="size != null">size = #{size},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除档案柜分区 -->
+    <delete id="deleteCompartmentById" parameterType="Long">
+        DELETE FROM compartment WHERE id = #{id}
+    </delete>
+
+    <!-- 批量删除档案柜分区 -->
+    <delete id="deleteCompartmentByIds" parameterType="String">
+        DELETE FROM compartment
+        WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="listByCabinetIds" parameterType="java.lang.Long" resultMap="CompartmentResult">
+        <include refid="selectCompartmentVo"/>
+        WHERE cabinet_id IN
+        <foreach item="cabinetId" collection="array" open="(" separator="," close=")">
+            #{cabinetId}
+        </foreach>
+        ORDER BY id
+    </select>
+
+    <select id="selectCompartmentByLocation" parameterType="map" resultMap="CompartmentResult">
+        <include refid="selectCompartmentVo"/>
+        WHERE cabinet_id =  #{cabinetId} and le_no =  #{leNo} and div_no =  #{divNo}
+        ORDER BY id
+    </select>
+    <select id="getUsedCompartment" resultMap="CompartmentResult">
+        select * from tb_compartment
+        where size != 0
+    </select>
+
+</mapper>

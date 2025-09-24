@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-activiti8/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-activiti8/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-admin/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-admin/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-common/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-elasticsearch/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-elasticsearch/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-framework/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-framework/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-generator/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-generator/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-manage/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-manage/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-minio/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-minio/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-quartz/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-quartz/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-seal/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-seal/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-system/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/iams-system/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/iams-backend/src/main/resources" charset="UTF-8" />
+  </component>
+</project>

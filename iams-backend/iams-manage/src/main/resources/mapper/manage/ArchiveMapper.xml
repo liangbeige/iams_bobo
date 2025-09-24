@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.ArchiveMapper">
+
+    <resultMap type="Archive" id="ArchiveResult">
+        <result property="id"    column="id"    />
+        <result property="danghao"    column="danghao"    />
+        <result property="name"    column="name"    />
+        <result property="hasDestructionCertificate" column="has_destruction_certificate" />
+        <result property="destructionCertificateUrl" column="destruction_certificate_url" />
+        <result property="rfid"    column="rfid"    />
+        <result property="jianhao"    column="jianhao"    />
+        <result property="secretLevel"    column="secret_level"    />
+        <result property="secretPeroid"    column="secret_peroid"    />
+        <result property="desecretDate"    column="desecret_date"    />
+        <result property="retentionPeriod"    column="retention_period"    />
+        <result property="carrierType"    column="carrier_type"    />
+        <result property="startDate"    column="start_date"    />
+        <result property="endDate"    column="end_date"    />
+        <result property="guidangTime"    column="guidang_time"    />
+        <result property="shitiLocation"    column="shiti_location"    />
+        <result property="exactLocation"    column="exact_location"    />
+        <result property="dianziLocation"    column="dianzi_location"    />
+        <result property="directory"    column="directory"    />
+        <result property="description"    column="description"    />
+        <result property="formationUnit"    column="formation_unit"    />
+        <result property="transferUnit"    column="transfer_unit"    />
+        <result property="documentCount"    column="document_count"    />
+        <result property="status"    column="status"    />
+        <result property="authenticity"    column="authenticity"    />
+        <result property="integrity"    column="integrity"    />
+        <result property="availability"    column="availability"    />
+        <result property="security"    column="security"    />
+        <result property="categoryId"    column="category_id"    />
+        <result property="fondsId"    column="fonds_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+        <result property="extraInfo"    column="extra_info"    />
+        <result property="projectId" column="project_id"/>
+        <result property="juanhao" column="juanhao"/>
+        <result property="projectName" column="project_name"/>
+        <result property="fondsName" column="fonds_name"/>
+    </resultMap>
+    <!--    <sql id="selectArchiveVo">-->
+    <!--        select id, danghao, name, rfid, jianhao, secret_level, secret_peroid, desecret_date, retention_period, carrier_type, start_date, end_date, guidang_time, shiti_location, dianzi_location, directory, description, formation_unit, transfer_unit, document_count, status, authenticity, integrity, availability, security, category_id, fonds_id, create_time, create_by, update_time, update_by, remark, extra_info ,p.name AS project_name from tb_archive a-->
+    <!--         LEFT JOIN tb_project p ON a.project_id = p.id-->
+    <!--    </sql>-->
+    <sql id="selectArchiveVo">
+        SELECT
+            a.*,  -- 原有字段
+            p.name AS project_name, -- 项目名称
+            f.name AS fonds_name    -- 全宗名称
+            a.has_destruction_certificate, a.destruction_certificate_url
+        FROM tb_archive a
+                 LEFT JOIN tb_project p ON a.project_id = p.id
+                 LEFT JOIN tb_fonds f ON a.fonds_id = f.id
+    </sql>
+    <select id="selectArchiveListByStatuses" resultMap="ArchiveResult">
+        SELECT * FROM tb_archive
+        <where>
+            <!-- 修正参数引用为 archive.xxx -->
+            <if test="archive.danghao != null and archive.danghao != ''">
+                AND danghao Like CONCAT('%', #{archive.danghao}, '%')
+            </if>
+            <if test="archive.name != null and archive.name != ''">
+                AND name LIKE CONCAT('%', #{archive.name}, '%')
+            </if>
+            <if test="archive.categoryId != null and archive.categoryId != ''">
+                AND LOWER(category_id) LIKE CONCAT('%', LOWER(#{archive.categoryId}), '%')
+            </if>
+            <!-- 其他字段保持相同修改方式 -->
+            <if test="archive.rfid != null and archive.rfid != ''">
+                AND rfid = #{archive.rfid}
+            </if>
+
+            <!-- 状态查询 -->
+            AND status IN
+            <foreach collection="statuses" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+    <select id="checkRfidDuplicate" parameterType="String" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_archive
+        WHERE SUBSTRING(rfid, 1, 22) = #{rfid}
+    </select>
+
+    <select id="selectArchiveList" parameterType="Archive" resultMap="ArchiveResult">
+        <include refid="selectArchiveVo"/>
+        <where>
+            <if test="danghao != null  and danghao != ''"> and a.danghao like concat('%', #{danghao}, '%')</if>
+            <if test="name != null  and name != ''"> and a.name like concat('%', #{name}, '%')</if>
+            <if test="rfid != null  and rfid != ''"> and a.rfid = #{rfid}</if>
+            <if test="secretLevel != null  and secretLevel != ''"> and a.secret_level = #{secretLevel}</if>
+            <if test="secretPeroid != null  and secretPeroid != ''"> and a.secret_peroid = #{secretPeroid}</if>
+            <if test="retentionPeriod != null  and retentionPeriod != ''"> and a.retention_period = #{retentionPeriod}</if>
+            <if test="carrierType != null  and carrierType != ''"> and a.carrier_type = #{carrierType}</if>
+            <if test="guidangTime != null "> and a.guidang_time = #{guidangTime}</if>
+            <if test="directory != null  and directory != ''"> and a.directory = CAST(#{directory} AS json)</if>
+            <if test="status != null  and status != ''"> and a.status = #{status}</if>
+            <if test="categoryId != null "> and a.category_id like concat('%', #{categoryId}, '%')</if>
+            <if test="fondsId != null "> and a.fonds_id = #{fondsId}</if>
+            <if test="fondsName != null and fondsName != ''">
+                and f.name like concat('%', #{fondsName}, '%')
+            </if>
+            <if test="extraInfo != null"> and a.extra_info = #{extraInfo}</if>
+            <if test="juanhao != null"> and a.juanhao = #{juanhao}</if>
+            <if test="projectId != null"> AND a.project_id = #{projectId}</if>
+            <if test="projectName != null and projectName != ''">
+                AND p.name LIKE CONCAT('%', #{projectName}, '%')
+            </if>
+
+            <choose>
+                <!-- 同时有大类和小类时，两个都要匹配 -->
+                <when test="rootCategoryCode != null and rootCategoryCode != '' and categoryCode != null and categoryCode != ''">
+                    AND a.category_id LIKE CONCAT('%', #{rootCategoryCode}, '%')
+                    AND a.category_id LIKE CONCAT('%', #{categoryCode}, '%')
+                </when>
+                <!-- 只有大类时 -->
+                <when test="rootCategoryCode != null and rootCategoryCode != ''">
+                    AND a.category_id LIKE CONCAT('%', #{rootCategoryCode}, '%')
+                </when>
+                <!-- 只有小类时 -->
+                <when test="categoryCode != null and categoryCode != ''">
+                    AND a.category_id LIKE CONCAT('%', #{categoryCode}, '%')
+                </when>
+            </choose>
+
+        </where>
+        ORDER BY a.create_time DESC, a.danghao ASC
+    </select>
+
+
+    <select id="selectArchiveListByUserBorrow" resultMap="ArchiveResult">
+        SELECT
+            a.* FROM tb_archive a
+                         INNER JOIN tb_borrow_record br ON a.id = br.archive_id
+        WHERE br.user_id = #{userId}
+          AND br.status = '已批准'
+    </select>
+
+    <select id="selectBorrowArchiveInVolume" resultMap="ArchiveResult">
+        <include refid="selectArchiveVo"/>
+        WHERE (a.project_id, a.juanhao) IN (
+        SELECT DISTINCT a2.project_id, a2.juanhao
+        FROM tb_archive a2
+        INNER JOIN tb_borrow_record br ON a2.id = br.archive_id
+        WHERE br.user_id = #{userId} AND br.status = '已批准'
+        )
+        <if test="archive != null">
+            <if test="archive.danghao != null and archive.danghao != ''">
+                AND a.danghao LIKE CONCAT('%', #{archive.danghao}, '%')
+            </if>
+            <if test="archive.name != null and archive.name != ''">
+                AND a.name LIKE CONCAT('%', #{archive.name}, '%')
+            </if>
+            <if test="archive.rfid != null and archive.rfid != ''">
+                AND a.rfid = #{archive.rfid}
+            </if>
+            <if test="archive.secretLevel != null and archive.secretLevel != ''">
+                AND a.secret_level = #{archive.secretLevel}
+            </if>
+            <if test="archive.secretPeroid != null and archive.secretPeroid != ''">
+                AND a.secret_peroid = #{archive.secretPeroid}
+            </if>
+            <if test="archive.retentionPeriod != null and archive.retentionPeriod != ''">
+                AND a.retention_period = #{archive.retentionPeriod}
+            </if>
+            <if test="archive.carrierType != null and archive.carrierType != ''">
+                AND a.carrier_type = #{archive.carrierType}
+            </if>
+            <if test="archive.guidangTime != null">
+                AND a.guidang_time = #{archive.guidangTime}
+            </if>
+            <if test="archive.directory != null and archive.directory != ''">
+                AND a.directory = CAST(#{archive.directory} AS json)
+            </if>
+            <if test="archive.status != null and archive.status != ''">
+                AND a.status = #{archive.status}
+            </if>
+            <if test="archive.categoryId != null">
+                AND a.category_id LIKE CONCAT('%', #{archive.categoryId}, '%')
+            </if>
+            <if test="archive.fondsId != null">
+                AND a.fonds_id = #{archive.fondsId}
+            </if>
+            <if test="archive.extraInfo != null">
+                AND a.extra_info = #{archive.extraInfo}
+            </if>
+            <if test="archive.juanhao != null">
+                AND a.juanhao = #{archive.juanhao}
+            </if>
+            <if test="archive.projectId != null">
+                AND a.project_id = #{archive.projectId}
+            </if>
+            <if test="archive.projectName != null and archive.projectName != ''">
+                AND p.name LIKE CONCAT('%', #{archive.projectName}, '%')
+            </if>
+        </if>
+        ORDER BY a.project_id, a.juanhao, a.id
+    </select>
+
+    <select id="selectArchiveById" parameterType="Long" resultMap="ArchiveResult">
+        <include refid="selectArchiveVo"/>
+        where a.id = #{id}
+    </select>
+
+    <select id="selectArchiveByDanghao" parameterType="String" resultMap="ArchiveResult">
+        <include refid="selectArchiveVo"/>
+        where a.danghao = #{danghao}
+    </select>
+
+    <select id="getArchiveIdByRfid" parameterType="String" resultType="Long">
+        select archive_id
+        from tb_archive
+        where rfid = #{rfid}
+    </select>
+
+    <insert id="insertArchive" parameterType="Archive" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_archive
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="danghao != null">danghao,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="rfid != null">rfid,</if>
+            <if test="jianhao != null">jianhao,</if>
+            <if test="secretLevel != null">secret_level,</if>
+            <if test="secretPeroid != null">secret_peroid,</if>
+            <if test="desecretDate != null">desecret_date,</if>
+            <if test="retentionPeriod != null">retention_period,</if>
+            <if test="carrierType != null">carrier_type,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="endDate != null">end_date,</if>
+            <if test="guidangTime != null">guidang_time,</if>
+            <if test="shitiLocation != null">shiti_location,</if>
+            <if test="dianziLocation != null">dianzi_location,</if>
+            <if test="exactLocation != null">exact_location,</if>
+            <if test="directory != null">directory,</if>
+            <if test="description != null">description,</if>
+            <if test="formationUnit != null">formation_unit,</if>
+            <if test="transferUnit != null">transfer_unit,</if>
+            <if test="documentCount != null">document_count,</if>
+            <if test="status != null">status,</if>
+            <if test="authenticity != null">authenticity,</if>
+            <if test="integrity != null">integrity,</if>
+            <if test="availability != null">availability,</if>
+            <if test="security != null">security,</if>
+            <if test="categoryId != null">category_id,</if>
+            <if test="fondsId != null">fonds_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="remark != null">remark,</if>
+            <if test="extraInfo != null">extra_info,</if>
+            <if test="projectId != null">project_id,</if>
+            <if test="juanhao != null">juanhao,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="danghao != null">#{danghao},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="rfid != null">#{rfid},</if>
+            <if test="jianhao != null">#{jianhao},</if>
+            <if test="secretLevel != null">#{secretLevel},</if>
+            <if test="secretPeroid != null">#{secretPeroid},</if>
+            <if test="desecretDate != null">#{desecretDate},</if>
+            <if test="retentionPeriod != null">#{retentionPeriod},</if>
+            <if test="carrierType != null">#{carrierType},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="endDate != null">#{endDate},</if>
+            <if test="guidangTime != null">#{guidangTime},</if>
+            <if test="shitiLocation != null">#{shitiLocation},</if>
+            <if test="dianziLocation != null">#{dianziLocation},</if>
+            <if test="exactLocation != null">#{exactLocation},</if>
+            <if test="directory != null">CAST(#{directory} AS json),</if>
+            <if test="description != null">#{description},</if>
+            <if test="formationUnit != null">#{formationUnit},</if>
+            <if test="transferUnit != null">#{transferUnit},</if>
+            <if test="documentCount != null">#{documentCount},</if>
+            <if test="status != null">#{status},</if>
+            <if test="authenticity != null">#{authenticity},</if>
+            <if test="integrity != null">#{integrity},</if>
+            <if test="availability != null">#{availability},</if>
+            <if test="security != null">#{security},</if>
+            <if test="categoryId != null">#{categoryId},</if>
+            <if test="fondsId != null">#{fondsId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="extraInfo != null">#{extraInfo},</if>
+            <if test="projectId != null">#{projectId},</if>
+            <if test="juanhao != null">#{juanhao}</if>
+        </trim>
+    </insert>
+
+    <update id="updateArchive" parameterType="Archive">
+        update tb_archive
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="danghao != null">danghao = #{danghao},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="rfid != null">rfid = #{rfid},</if>
+            <if test="jianhao != null">jianhao = #{jianhao},</if>
+            <if test="secretLevel != null">secret_level = #{secretLevel},</if>
+            <if test="secretPeroid != null">secret_peroid = #{secretPeroid},</if>
+            <if test="desecretDate != null">desecret_date = #{desecretDate},</if>
+            <if test="retentionPeriod != null">retention_period = #{retentionPeriod},</if>
+            <if test="carrierType != null">carrier_type = #{carrierType},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="guidangTime != null">guidang_time = #{guidangTime},</if>
+            <if test="shitiLocation != null">shiti_location = #{shitiLocation},</if>
+            <if test="dianziLocation != null">dianzi_location = #{dianziLocation},</if>
+            <if test="exactLocation != null">exact_location = #{exactLocation},</if>
+            <if test="directory != null">directory = CAST(#{directory} AS json),</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="formationUnit != null">formation_unit = #{formationUnit},</if>
+            <if test="transferUnit != null">transfer_unit = #{transferUnit},</if>
+            <if test="documentCount != null">document_count = #{documentCount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="authenticity != null">authenticity = #{authenticity},</if>
+            <if test="integrity != null">integrity = #{integrity},</if>
+            <if test="availability != null">availability = #{availability},</if>
+            <if test="security != null">security = #{security},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="fondsId != null">fonds_id = #{fondsId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="extraInfo != null">extra_info = #{extraInfo},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="juanhao != null">juanhao = #{juanhao}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateArchiveCertificateInfo" parameterType="Archive">
+        update tb_archive
+        <set>
+            has_destruction_certificate = #{hasDestructionCertificate},
+            destruction_certificate_url = #{destructionCertificateUrl}
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveById" parameterType="Long">
+        delete from tb_archive where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveByIds" parameterType="String">
+        delete from tb_archive where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="addDirectoryFiles" parameterType="Archive">
+        UPDATE tb_archive
+        SET directory = CAST(#{directory} AS json)
+        WHERE id = #{id};
+    </update>
+
+    <update id="deleteDirectoryFiles" parameterType="Archive">
+        UPDATE tb_archive
+        SET directory = CAST(#{directory} AS json)
+        WHERE id = #{id};
+    </update>
+
+    <select id="getArchiveByLocation" parameterType="map" resultMap="ArchiveResult">
+        SELECT *
+        FROM tb_archive
+        WHERE shiti_location = #{shitiLocation}
+          AND exact_location = #{exactLocation}
+        ORDER BY category_id ASC
+    </select>
+
+    <select id="getListByLocation" parameterType="String" resultMap="ArchiveResult">
+        SELECT *
+        FROM tb_archive
+        WHERE shiti_location = #{shitiLocation}
+        ORDER BY category_id ASC
+    </select>
+
+    <select id="selectUpArchiveList" resultType="com.iams.manage.domain.Archive">
+        SELECT *
+        FROM tb_archive
+        WHERE shiti_location IS NULL OR shiti_location = '' OR exact_location IS NULL OR exact_location = ''
+    </select>
+
+    <insert id="batchInsertArchives" parameterType="list">
+        INSERT INTO tb_archive (
+        danghao, name, rfid, jianhao, secret_level, secret_peroid,
+        desecret_date, retention_period, carrier_type, start_date,
+        end_date, guidang_time, shiti_location, dianzi_location,
+        exact_location, directory, description, formation_unit,
+        transfer_unit, document_count, status, authenticity,
+        integrity, availability, security, category_id, fonds_id,
+        create_time, create_by, update_time, update_by, remark,
+        extra_info, project_id, juanhao
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.danghao},
+            #{item.name},
+            #{item.rfid},
+            #{item.jianhao},
+            #{item.secretLevel},
+            #{item.secretPeroid},
+            #{item.desecretDate},
+            #{item.retentionPeriod},
+            #{item.carrierType},
+            #{item.startDate},
+            #{item.endDate},
+            #{item.guidangTime},
+            #{item.shitiLocation},
+            #{item.dianziLocation},
+            #{item.exactLocation},
+            <choose>
+                <when test="item.directory != null">CAST(#{item.directory} AS json)</when>
+                <otherwise>NULL</otherwise>
+            </choose>,
+            #{item.description},
+            #{item.formationUnit},
+            #{item.transferUnit},
+            #{item.documentCount},
+            #{item.status},
+            #{item.authenticity},
+            #{item.integrity},
+            #{item.availability},
+            #{item.security},
+            #{item.categoryId},
+            #{item.fondsId},
+            #{item.createTime},
+            #{item.createBy},
+            #{item.updateTime},
+            #{item.updateBy},
+            #{item.remark},
+            #{item.extraInfo},
+            #{item.projectId},
+            #{item.juanhao}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 检查批量档号是否存在 -->
+    <select id="checkDanghaoExistsBatch" resultType="int">
+        SELECT COUNT(1)
+        FROM tb_archive
+        WHERE danghao IN
+        <foreach collection="danghaos" item="danghao" open="(" separator="," close=")">
+            #{danghao}
+        </foreach>
+    </select>
+
+    <!-- 获取具体重复存在的档号列表 -->
+    <select id="getExistingDanghaos" resultType="String">
+        SELECT danghao
+        FROM tb_archive
+        WHERE danghao IN
+        <foreach collection="danghaos" item="danghao" open="(" separator="," close=")">
+            #{danghao}
+        </foreach>
+        ORDER BY danghao
+    </select>
+
+
+    <!-- 检查批量档号是否存在（排除指定ID） -->
+    <select id="checkDanghaoExistsBatchExcludeId" resultType="int">
+        SELECT COUNT(1)
+        FROM tb_archive
+        WHERE danghao IN
+        <foreach collection="danghaos" item="danghao" open="(" separator="," close=")">
+            #{danghao}
+        </foreach>
+        AND id != #{excludeId}
+    </select>
+
+    <!-- 获取具体重复存在的档号列表（排除指定ID） -->
+    <select id="getExistingDanghaosExcludeId" resultType="String">
+        SELECT danghao
+        FROM tb_archive
+        WHERE danghao IN
+        <foreach collection="danghaos" item="danghao" open="(" separator="," close=")">
+            #{danghao}
+        </foreach>
+        AND id != #{excludeId}
+        ORDER BY danghao
+    </select>
+
+    <!-- 根据ID列表查询档案 -->
+    <select id="selectArchiveListByIds" resultMap="ArchiveResult">
+        <include refid="selectArchiveVo"/>
+        WHERE a.id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- 根据 danghao 获取档案 -->
+    <!--    <select id="selectArchiveByDanghao" resultType="com.iams.manage.domain.Archive">-->
+    <!--        SELECT * FROM tb_archive-->
+    <!--        WHERE mysqlDanghao = #{danghao}-->
+    <!--    </select>-->
+
+    <select id="selectDanghaoMapByIds" resultType="map">
+        SELECT
+        id,          <!-- 原始字段名 -->
+        danghao      <!-- 原始字段名 -->
+        FROM tb_archive
+        WHERE id IN
+        <foreach item="id" collection="archiveIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+
+    <!-- 按项目查询档案 -->
+    <select id="selectArchiveByProjectId" parameterType="Long" resultMap="ArchiveResult">
+        <include refid="selectArchiveVo"/>
+        WHERE a.project_id = #{projectId}
+        ORDER BY a.category_id ASC
+    </select>
+
+    <!-- 新增方法：项目档案数量统计 -->
+    <select id="countArchiveByProject" resultType="java.util.Map">
+        SELECT
+            p.id AS project_id,
+            p.name AS project_name,
+            COUNT(a.id) AS archive_count
+        FROM tb_project p
+                 LEFT JOIN tb_archive a ON p.id = a.project_id
+        GROUP BY p.id, p.name
+    </select>
+
+
+    <!-- 统计项目下档案数量 -->
+    <select id="countByProjectId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM tb_archive
+        WHERE project_id = #{projectId}
+    </select>
+
+    <!-- 根据门类号查询档案 -->
+    <select id="selectByCategoryId" parameterType="map" resultType="archive">
+        SELECT *
+        FROM tb_archive
+        WHERE category_id like concat('%', #{categoryId}, '%') AND project_id = #{projectId}
+        ORDER BY category_id ASC
+    </select>
+
+    <!-- 根据RFID查询档案 -->
+    <select id="selectArchiveByRfid" parameterType="String" resultMap="ArchiveResult">
+        SELECT *
+        FROM tb_archive
+        WHERE rfid = #{rfid}
+    </select>
+    <select id="getArchivedList" resultMap="ArchiveResult">
+        SELECT *
+        FROM tb_archive
+        WHERE exact_location IS NOT NULL AND exact_location != ''
+    </select>
+
+</mapper>

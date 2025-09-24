@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+  <meta charset="utf-8" />
+  <title>在线绘制流程</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="css/diagram-js.css" />
+  <link rel="stylesheet" href="vendor/bpmn-font/css/bpmn-embedded.css" />
+  <link rel="stylesheet" href="css/app.css" />
+
+  <style>
+    .item{
+      display: none;
+      cursor: pointer;
+    }
+    .bjs-powered-by {
+      display: none;
+    }
+    .buttons > li {
+      /* display: inline-block; */
+      margin-right: 10px;
+      height: 26px;
+      line-height: 26px;
+      float: left;
+    }
+    .buttons > li > a.btn  {
+      background: #00BCD4;
+      border: none;
+      outline: none;
+      padding: 0px 10px;
+      color: #fff;
+      display: inline-block;
+      opacity: 1;
+      height: 26px;
+      font-size: 14px;
+      line-height: 26px;
+    }
+    .label  {
+      background: #00BCD4;
+      border: none;
+      outline: none;
+      padding: 0px 10px;
+      color: #fff;
+      display: inline-block;
+      cursor: pointer;
+      opacity: 1;
+      height: 26px;
+      font-size: 14px;
+      line-height: 26px;
+    }
+    .sy-mask{width:100%;
+      height:100%;
+      position:fixed;
+      background:rgba(0,0,0,0.8);
+      left:0;top:0;z-index:1000;
+      display: none;
+    }
+    .sy-alert{
+      position:fixed;display:none;background:#fff;border-radius:5px;overflow:hidden;width:300px;max-width:90%;max-height:80%;left:0;right:0;margin:0 auto;z-index:9999}.sy-alert.animated{-webkit-animation-duration:.3s;animation-duration:.3s}.sy-alert .sy-title{height:45px;color:#333;line-height:45px;font-size:15px;border-bottom:1px solid #eee;padding:0 12px}.sy-alert .sy-content{padding:20px;text-align:center;font-size:14px;line-height:24px;color:#666;overflow-y:auto}.sy-alert .sy-btn{height:50%;border-top:1px solid #eee;overflow:hidden}.sy-alert .sy-btn button{float:left;border:0;color:#333;cursor:pointer;background:#fff;width:50%;line-height:45px;font-size:15px;text-align:center}.sy-alert .sy-btn button:nth-child(1){color:#888;border-right:1px solid #eee}.sy-alert.sy-alert-alert .sy-btn button{float:none;width:100%}.sy-alert.sy-alert-tips{text-align:center;width:150px;background:rgba(0,0,0,0.7)}.sy-alert.sy-alert-tips .sy-content{padding:8px;color:#fff;font-size:14px}.sy-alert.sy-alert-model .sy-content{text-align:left}.sy-alert.sy-alert-model .sy-content .form .input-item{margin-bottom:12px;position:relative}.sy-alert.sy-alert-model .sy-content .form .input-item input{display:block;position:relative;width:100%;border:1px solid #eee;padding:10px}.sy-alert.sy-alert-model .sy-content .form .input-item .getcode{border:0;top:0;right:0;position:absolute;background:0;line-height:37px;color:#f60;width:100px;text-align:center}
+    .sy-table .user-item.selected {
+      background-color: #e6f7ff;
+    }
+    .sy-table input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+    .sy-table th input[type="checkbox"] {
+      margin: 0;
+    }
+    .sy-table td {
+      vertical-align: middle;
+    }
+    /* 用户选择弹窗专用样式 */
+    .sy-alert-user-select {
+      width: 800px;
+      height: 600px;
+      max-width: 90%;
+      max-height: 90%;
+    }
+    .sy-alert-user-select .sy-title {
+      background: #f8f8f8;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .sy-alert-user-select .sy-content {
+      padding: 15px;
+      height: calc(100% - 110px);
+      overflow-y: auto;
+    }
+    .sy-alert-user-select .sy-btn {
+      height: auto;
+      padding: 10px;
+      text-align: right;
+      background: #f8f8f8;
+    }
+    .sy-alert-user-select .sy-btn button {
+      float: none;
+      display: inline-block;
+      width: auto;
+      padding: 0 20px;
+      margin-left: 10px;
+      height: 32px;
+      line-height: 32px;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+    .sy-alert-user-select .sy-btn button:first-child {
+      background: #1890ff;
+      color: #fff;
+      border: none;
+    }
+    .sy-alert-user-select .sy-btn button.tableCancel {
+      background: #f2f2f2;
+      color: #666;
+      border: 1px solid #ddd;
+    }
+    .sy-alert-user-select .sy-table {
+      width: 100%;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+    }
+    .sy-alert-user-select .sy-table th {
+      background: #fafafa;
+      padding: 12px 8px;
+      font-weight: 500;
+    }
+    .sy-alert-user-select .sy-table td {
+      padding: 12px 8px;
+      border-top: 1px solid #e8e8e8;
+    }
+    .sy-alert-user-select .sy-table tr:hover {
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+
+<body>
+<div class="content with-diagram" id="js-drop-zone">
+  <div class="message error">
+    <div class="note">
+      <p>无法显示bpms2.0</p>
+      <div class="details">
+        <span>错误详细信息</span>
+        <pre></pre>
+      </div>
+    </div>
+  </div>
+  <div class="canvas" id="js-canvas"></div>
+  <div class="properties-panel-parent" id="js-properties-panel"></div>
+</div>
+<ul class="buttons">
+  <li class="item upload">
+    <form id="form1" name="myForm" onsubmit="return false" method="post" enctype="multipart/form-data" title="上传文件">
+      <input type="file" name="uploadFile" id="uploadFile" accept=".bpmn" style="display: none">
+      <label class="label" for="uploadFile" >导入</label>
+    </form>
+  </li>
+  <li class="item download">
+    <a class="btn" href id="downloadBpmn">导出</a>
+  </li>
+  <li class="item submit">
+    <a class="btn" id="js-download-diagram">
+      部署
+    </a>
+  </li>
+</ul>
+<div class="sy-alert sy-alert-user-select animated" sy-enter="zoomIn" sy-leave="zoomOut" sy-type="confirm" sy-mask="true" id="tableAlert" >
+  <div class="sy-title">选择用户</div>
+  <div class="sy-content">
+    <table class="sy-table">
+      <thead>
+        <tr>
+          <th width="40">
+            <input type="checkbox" id="checkAll">
+          </th>
+          <th>用户ID</th>
+          <th>用户名称</th>
+          <th>所属部门</th>
+        </tr>
+      </thead>
+      <tbody id="userList">
+        <!-- 用户数据将通过JavaScript动态插入 -->
+      </tbody>
+    </table>
+  </div>
+  <div class="sy-btn">
+    <button id="tableSure">确定</button>
+    <button class="tableCancel">取消</button>
+  </div>
+</div>
+
+<div class="sy-alert sy-alert-user-select animated" sy-enter="zoomIn" sy-leave="zoomOut" sy-type="confirm" sy-mask="true" id="userGroupAlert" >
+  <div class="sy-title">选择用户组</div>
+  <div class="sy-content">
+    <table class="sy-table">
+      <thead>
+      <tr>
+        <th width="40">
+          <input type="checkbox" id="groupcheckAll">
+        </th>
+        <th>岗位ID</th>
+        <th>岗位代码</th>
+        <th>岗位名</th>
+      </tr>
+      </thead>
+      <tbody id="userGroup">
+      <!-- 用户数据将通过JavaScript动态插入 -->
+      </tbody>
+    </table>
+  </div>
+  <div class="sy-btn">
+    <button id="userGroupSure">确定</button>
+    <button class="userGroupCancel">取消</button>
+  </div>
+</div>
+
+<div class="sy-alert sy-alert-user-select animated" sy-enter="zoomIn" sy-leave="zoomOut" sy-type="confirm" sy-mask="true" id="formAlert" >
+  <div class="sy-title">选择表单</div>
+  <div class="sy-content">
+    <table class="sy-table">
+      <thead>
+        <tr>
+          <th width="40">
+            <input type="checkbox" id="formCheckAll">
+          </th>
+          <th>表单ID</th>
+          <th>表单key</th>
+          <th>表单名</th>
+          <th>创建时间</th>
+        </tr>
+      </thead>
+      <tbody id="formList">
+        <!-- 表单数据将通过JavaScript动态插入 -->
+      </tbody>
+    </table>
+  </div>
+  <div class="sy-btn">
+    <button id="formSure">确定</button>
+    <button class="formCancel">取消</button>
+  </div>
+</div>
+<div class="sy-alert sy-alert-model animated" sy-enter="zoomIn" sy-leave="zoomOut" sy-type="confirm" sy-mask="true" id="alert" >
+  <div class="sy-title">部署流程</div>
+  <div class="sy-content">
+        确认是否部署该流程
+<!--    <div class="form">-->
+<!--      <p class="input-item"><input id="deploymentName" type="text" placeholder="请输入流程名称"></p>-->
+<!--    </div>-->
+  </div>
+  <div class="sy-btn">
+    <button id="sure">确定</button>
+    <button class="cancel" >取消</button>
+  </div>
+</div>
+<div class="sy-mask cancel"></div>
+<script src="index.js"></script>
+</body>
+</html>

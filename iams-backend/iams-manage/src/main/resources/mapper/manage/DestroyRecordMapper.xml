@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.DestroyRecordMapper">
+
+    <!--
+    修改说明：
+    1. 调整字段映射，只保留数据表中存在的字段
+    2. 移除了 business_key, instance_id, applicant, scheduled_date, description, archive_count 等字段
+    3. 保留核心字段：id, user_id, archive_id, purpose, status, start_apply_time, end_apply_time, remark
+    4. 适配PostgreSQL数据库语法
+    -->
+
+    <resultMap type="DestroyRecord" id="DestroyRecordResult">
+        <result property="id"               column="id"                 />
+        <result property="userId"           column="user_id"            />
+        <result property="archiveId"        column="archive_id"         />
+        <result property="purpose"          column="purpose"            />
+        <result property="status"           column="status"             />
+        <result property="startApplyTime"   column="start_apply_time"   />
+        <result property="endApplyTime"     column="end_apply_time"     />
+        <result property="remark"           column="remark"             />
+    </resultMap>
+
+    <sql id="selectDestroyRecordVo">
+        select id, user_id, archive_id, purpose, status, start_apply_time, end_apply_time, remark
+        from iams.tb_destroy_record
+    </sql>
+
+    <select id="selectDestroyRecordList" parameterType="DestroyRecord" resultMap="DestroyRecordResult">
+        <include refid="selectDestroyRecordVo"/>
+        <where>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+            <if test="archiveId != null">
+                and archive_id = #{archiveId}
+            </if>
+            <if test="purpose != null and purpose != ''">
+                and purpose ilike concat('%', #{purpose}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark ilike concat('%', #{remark}, '%')
+            </if>
+            <!-- 支持时间范围查询 -->
+            <if test="params != null">
+                <if test="params.beginTime != null and params.beginTime != ''">
+                    and start_apply_time <![CDATA[ >= ]]> #{params.beginTime}::timestamp
+                </if>
+                <if test="params.endTime != null and params.endTime != ''">
+                    and start_apply_time <![CDATA[ <= ]]> #{params.endTime}::timestamp
+                </if>
+            </if>
+        </where>
+        order by start_apply_time desc
+    </select>
+
+    <select id="selectDestroyRecordById" parameterType="Long" resultMap="DestroyRecordResult">
+        <include refid="selectDestroyRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectDestroyRecordByArchiveId" parameterType="Long" resultMap="DestroyRecordResult">
+        <include refid="selectDestroyRecordVo"/>
+        where archive_id = #{archiveId}
+        order by start_apply_time desc
+    </select>
+
+    <select id="selectDestroyRecordByUserId" parameterType="Long" resultMap="DestroyRecordResult">
+        <include refid="selectDestroyRecordVo"/>
+        where user_id = #{userId}
+        order by start_apply_time desc
+    </select>
+
+    <select id="countByStatus" parameterType="String" resultType="int">
+        select count(*) from iams.tb_destroy_record where status = #{status}
+    </select>
+
+    <select id="countByUserIdAndStatus" resultType="int">
+        select count(*) from iams.tb_destroy_record
+        where user_id = #{userId} and status = #{status}
+    </select>
+
+    <!-- PostgreSQL版本的插入语句，使用SERIAL主键自增 -->
+    <insert id="insertDestroyRecord" parameterType="DestroyRecord" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into iams.tb_destroy_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="archiveId != null">archive_id,</if>
+            <if test="purpose != null and purpose != ''">purpose,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="startApplyTime != null">start_apply_time,</if>
+            <if test="endApplyTime != null">end_apply_time,</if>
+            <if test="remark != null and remark != ''">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="purpose != null and purpose != ''">#{purpose},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="startApplyTime != null">#{startApplyTime},</if>
+            <if test="endApplyTime != null">#{endApplyTime},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updateDestroyRecord" parameterType="DestroyRecord">
+        update iams.tb_destroy_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="purpose != null">purpose = #{purpose},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="startApplyTime != null">start_apply_time = #{startApplyTime},</if>
+            <if test="endApplyTime != null">end_apply_time = #{endApplyTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteDestroyRecordById" parameterType="Long">
+        delete from iams.tb_destroy_record where id = #{id}
+    </delete>
+
+    <delete id="deleteDestroyRecordByIds" parameterType="String">
+        delete from iams.tb_destroy_record where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}::bigint
+        </foreach>
+    </delete>
+
+</mapper>

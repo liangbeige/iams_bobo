@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.WatermarkMapper">
+    
+    <resultMap type="Watermark" id="WatermarkResult">
+        <result property="id"    column="id"    />
+        <result property="content"    column="content"    />
+        <result property="color"    column="color"    />
+        <result property="fontsize"    column="fontsize"    />
+        <result property="fontweight"    column="fontweight"    />
+        <result property="fontfamily"    column="fontfamily"    />
+        <result property="fontstyle"    column="fontstyle"    />
+        <result property="rotate"    column="rotate"    />
+        <result property="gapX"    column="gap_x"    />
+        <result property="gapY"    column="gap_y"    />
+        <result property="offsetX"    column="offset_x"    />
+        <result property="offsetY"    column="offset_y"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+        <result property="defaultId"    column="default_id"    />
+    </resultMap>
+
+    <sql id="selectWatermarkVo">
+        select id, content, color, fontsize, fontweight, fontfamily, fontstyle, rotate, gap_x, gap_y, offset_x, offset_y, create_time, create_by, update_time, update_by, remark, default_id from tb_watermark
+    </sql>
+
+    <select id="selectWatermarkList" parameterType="Watermark" resultMap="WatermarkResult">
+        <include refid="selectWatermarkVo"/>
+        <where>  
+            <if test="content != null  and content != ''"> and content like concat('%', #{content}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectWatermarkById" parameterType="Long" resultMap="WatermarkResult">
+        <include refid="selectWatermarkVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertWatermark" parameterType="Watermark" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_watermark
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="content != null and content != ''">content,</if>
+            <if test="color != null">color,</if>
+            <if test="fontsize != null">fontsize,</if>
+            <if test="fontweight != null">fontweight,</if>
+            <if test="fontfamily != null">fontfamily,</if>
+            <if test="fontstyle != null">fontstyle,</if>
+            <if test="rotate != null">rotate,</if>
+            <if test="gapX != null">gap_x,</if>
+            <if test="gapY != null">gap_y,</if>
+            <if test="offsetX != null">offset_x,</if>
+            <if test="offsetY != null">offset_y,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="content != null and content != ''">#{content},</if>
+            <if test="color != null">#{color},</if>
+            <if test="fontsize != null">#{fontsize},</if>
+            <if test="fontweight != null">#{fontweight},</if>
+            <if test="fontfamily != null">#{fontfamily},</if>
+            <if test="fontstyle != null">#{fontstyle},</if>
+            <if test="rotate != null">#{rotate},</if>
+            <if test="gapX != null">#{gapX},</if>
+            <if test="gapY != null">#{gapY},</if>
+            <if test="offsetX != null">#{offsetX},</if>
+            <if test="offsetY != null">#{offsetY},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateWatermark" parameterType="Watermark">
+        update tb_watermark
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="color != null">color = #{color},</if>
+            <if test="fontsize != null">fontsize = #{fontsize},</if>
+            <if test="fontweight != null">fontweight = #{fontweight},</if>
+            <if test="fontfamily != null">fontfamily = #{fontfamily},</if>
+            <if test="fontstyle != null">fontstyle = #{fontstyle},</if>
+            <if test="rotate != null">rotate = #{rotate},</if>
+            <if test="gapX != null">gap_x = #{gapX},</if>
+            <if test="gapY != null">gap_y = #{gapY},</if>
+            <if test="offsetX != null">offset_x = #{offsetX},</if>
+            <if test="offsetY != null">offset_y = #{offsetY},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteWatermarkById" parameterType="Long">
+        delete from tb_watermark where id = #{id}
+    </delete>
+
+    <delete id="deleteWatermarkByIds" parameterType="String">
+        delete from tb_watermark where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="setDefault" parameterType="Long">
+        update tb_watermark set default_id = #{id}
+    </update>
+
+    <select id="selectDefaultWatermark" resultMap="WatermarkResult">
+        SELECT * FROM tb_watermark WHERE id = (SELECT default_id FROM tb_watermark WHERE id = 10000)
+    </select>
+</mapper>

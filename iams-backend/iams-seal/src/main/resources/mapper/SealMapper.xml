@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.mapper.SealMapper">
+
+    <!-- 定义结果映射 -->
+    <resultMap id="SealResult" type="com.iams.domain.Seal">
+        <id     property="id"           column="id"          />
+        <result property="sealName"     column="sealname"   />
+        <result property="sealType"     column="sealtype"   />
+        <result property="mainText"     column="maintext"   />
+        <result property="viceText"     column="vicetext"   />
+        <result property="centerText"   column="centertext" />
+        <result property="additionalText" column="additionaltext" />
+        <!-- 其他字段映射... -->
+    </resultMap>
+
+    <!-- 通用查询SQL片段 -->
+    <sql id="selectSealVo">
+        SELECT
+            id, sealname, sealtype,
+            maintext, vicetext, centertext,
+            additionaltext, createtime
+        FROM tb_seal
+    </sql>
+
+    <!-- 查询列表 -->
+    <select id="selectSealList" parameterType="com.iams.domain.Seal" resultMap="SealResult">
+        <include refid="selectSealVo"/>
+        <where>
+            <if test="sealName != null and sealName != ''">
+                AND sealName LIKE CONCAT('%', #{sealName}, '%')
+            </if>
+            <if test="sealType != null and sealType != ''">
+                AND sealType = #{sealType}
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据ID查询 -->
+    <select id="selectSealById" parameterType="Long" resultMap="SealResult">
+        <include refid="selectSealVo"/>
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增 -->
+    <insert id="insertSeal" parameterType="com.iams.domain.Seal" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_seal (
+            sealName, sealType,
+            mainText, viceText, centerText,
+            additionalText
+        ) VALUES (
+                     #{sealName}, #{sealType},
+                     #{mainText}, #{viceText}, #{centerText},
+                     #{additionalText}, sysdate()
+                 )
+    </insert>
+
+    <!-- 修改 -->
+    <update id="updateSeal" parameterType="com.iams.domain.Seal">
+        UPDATE tb_seal
+        <set>
+            <if test="sealName != null">sealName = #{sealName},</if>
+            <if test="sealType != null">sealType = #{sealType},</if>
+            <if test="mainText != null">mainText = #{mainText},</if>
+            <if test="viceText != null">viceText = #{viceText},</if>
+            <if test="centerText != null">centerText = #{centerText},</if>
+            <if test="additionalText != null">additionalText = #{additionalText},</if>
+            update_time = sysdate()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 批量删除 -->
+    <delete id="deleteSealByIds" parameterType="Long">
+        DELETE FROM tb_seal WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!--   更新 -->
+    <update id="updateById" parameterType="com.iams.domain.Seal">
+        UPDATE tb_seal
+        SET
+            sealName = #{sealName},
+            sealType = #{sealType},
+            mainText = #{mainText},
+            viceText = #{viceText},
+            centerText = #{centerText},
+            additionalText = #{additionalText},
+            mainFontFamily = #{mainFontFamily},
+            color = #{color},
+            imageSize = #{imageSize},
+            imagePath = #{imagePath},
+            updatetime = NOW()
+        WHERE id = #{id}
+    </update>
+</mapper>

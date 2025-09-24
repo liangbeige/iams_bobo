@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.ArchiveCategoryMapper">
+
+    <resultMap type="ArchiveCategory" id="ArchiveCategoryResult">
+        <result property="id"         column="id"         />
+        <result property="code"       column="code"       />
+        <result property="name"       column="name"       />
+        <result property="parentId"   column="parent_id"   />
+        <result property="ancestors"  column="ancestors"   />
+        <result property="sortOrder"  column="sort_order"  />
+        <result property="rootId"     column="root_id"     />
+        <result property="createBy"   column="create_by"   />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy"   column="update_by"   />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="selectCategoryVo">
+        select id, code, name, parent_id, ancestors, sort_order, root_id,
+               create_by, create_time, update_by, update_time
+        from tb_archive_category_tree
+    </sql>
+
+    <select id="selectNameListByCategoryCodes" resultType="java.lang.String">
+        SELECT name
+        FROM tb_archive_category_tree
+        WHERE code IN
+        <foreach item="code" collection="categoryCodes" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+    </select>
+
+    <select id="selectCategoryList" parameterType="ArchiveCategory" resultMap="ArchiveCategoryResult">
+        <include refid="selectCategoryVo"/>
+        <where>
+            <if test="code != null and code != ''">
+                AND code = #{code}  <!-- 改为精确匹配 -->
+            </if>
+            <if test="name != null and name != ''">
+                AND name = #{name}  <!-- 改为精确匹配 -->
+            </if>
+            <if test="parentId != null">
+                AND parent_id = #{parentId}
+            </if>
+            <if test="rootId != null">
+                AND root_id = #{rootId}
+            </if>
+        </where>
+        order by parent_id, sort_order
+    </select>
+
+    <!-- 新增精确查询方法 -->
+    <select id="selectExactRoot" resultMap="ArchiveCategoryResult">
+        SELECT * FROM tb_archive_category_tree
+        WHERE parent_id = 0
+          AND code = #{code}
+          AND name = #{name}
+    </select>
+
+    <!-- 根据code精确查询获取root_id -->
+    <select id="selectRootIdByCode" resultType="java.lang.Long">
+        SELECT
+            CASE
+                WHEN root_id IS NULL THEN id  -- 如果root_id为空，说明自己就是根节点
+                ELSE root_id
+                END AS root_id
+        FROM tb_archive_category_tree
+        WHERE code = #{code}  -- 精确匹配，不使用ILIKE
+            LIMIT 1
+    </select>
+
+    <!-- 根据code精确查询获取name -->
+    <select id="selectNameByCode" resultType="java.lang.String">
+        SELECT name
+        FROM tb_archive_category_tree
+        WHERE code = #{code}  -- 精确匹配，不使用ILIKE
+    </select>
+
+    <select id="selectCategoryById" parameterType="Long" resultMap="ArchiveCategoryResult">
+        <include refid="selectCategoryVo"/>
+        where id = #{id}
+    </select>
+
+<!--    <select id="selectCategoryRoots" resultMap="ArchiveCategoryResult">-->
+<!--        <include refid="selectCategoryVo"/>-->
+<!--        where parent_id is null-->
+<!--        order by sort_order-->
+<!--    </select>-->
+    <select id="selectCategoryRoots" parameterType="ArchiveCategory" resultMap="ArchiveCategoryResult">
+        <include refid="selectCategoryVo"/>
+        where parent_id is null
+        <if test="name != null and name != ''">
+            AND name ILIKE '%' || #{name} || '%'
+        </if>
+        <if test="code != null and code != ''">
+            AND code ILIKE '%' || #{code} || '%'
+        </if>
+        order by sort_order
+    </select>
+
+
+    <select id="searchCategoryRoots" parameterType="ArchiveCategory" resultMap="ArchiveCategoryResult">
+        SELECT DISTINCT r.*
+        FROM tb_archive_category_tree r
+        WHERE r.parent_id IS NULL
+        <if test="(name != null and name != '') or (code != null and code != '')">
+            AND r.id IN (
+            -- 找到所有匹配条件的节点对应的根节点ID
+            SELECT CASE
+            WHEN t.parent_id IS NULL THEN t.id  -- 如果匹配的就是根节点
+            ELSE COALESCE(t.root_id, t.id)      -- 否则取root_id，如果root_id为空则取自身id
+            END as root_id
+            FROM tb_archive_category_tree t
+            WHERE 1=1
+            <if test="name != null and name != ''">
+                AND t.name ILIKE '%' || #{name} || '%'
+            </if>
+            <if test="code != null and code != ''">
+                AND t.code ILIKE '%' || #{code} || '%'
+            </if>
+            )
+        </if>
+        ORDER BY r.sort_order ASC
+    </select>
+
+    <select id="selectCategoryByRootId" parameterType="Long" resultMap="ArchiveCategoryResult">
+        <include refid="selectCategoryVo"/>
+        where root_id = #{rootId}
+        order by parent_id, sort_order
+    </select>
+
+    <select id="countChildrenByRootId" parameterType="Long" resultType="int">
+        select count(1) from tb_archive_category_tree
+        where root_id = #{rootId} and parent_id is not null
+    </select>
+
+    <select id="checkCategoryCodeUnique" resultMap="ArchiveCategoryResult">
+        select id, code, name, parent_id, ancestors, sort_order, root_id
+        from tb_archive_category_tree
+        where code = #{code}
+        <if test="rootId != null">
+            and root_id = #{rootId}
+        </if>
+        limit 1
+    </select>
+
+    <select id="hasChildById" parameterType="Long" resultType="int">
+        select count(1) from tb_archive_category_tree
+        where parent_id = #{id} limit 1
+    </select>
+
+    <select id="selectNormalChildrenCategoryById" parameterType="Long" resultType="int">
+        select count(*) from tb_archive_category_tree
+        where #{id}::text = ANY(string_to_array(ancestors, ','))
+    </select>
+
+    <select id="selectChildrenCategoryById" parameterType="Long" resultMap="ArchiveCategoryResult">
+        select * from tb_archive_category_tree
+        where #{id}::text = ANY(string_to_array(ancestors, ','))
+    </select>
+
+    <insert id="insertCategory" parameterType="ArchiveCategory" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_archive_category_tree
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="code != null and code != ''">code,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="parentId != null">parent_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="rootId != null">root_id,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="code != null and code != ''">#{code},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="parentId != null">#{parentId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+            <if test="rootId != null">#{rootId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            now()
+        </trim>
+    </insert>
+
+    <update id="updateCategory" parameterType="ArchiveCategory">
+        update tb_archive_category_tree
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="code != null and code != ''">code = #{code},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="rootId != null">root_id = #{rootId},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = now()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateCategoryChildren" parameterType="java.util.List">
+        update tb_archive_category_tree set ancestors =
+        <foreach collection="categories" item="item" index="index"
+                 separator=" " open="case id" close="end">
+            when #{item.id} then #{item.ancestors}
+        </foreach>
+        where id in
+        <foreach collection="categories" item="item" index="index"
+                 separator="," open="(" close=")">
+            #{item.id}
+        </foreach>
+    </update>
+
+    <delete id="deleteCategoryById" parameterType="Long">
+        delete from tb_archive_category_tree where id = #{id}
+    </delete>
+
+
+    <!-- 根据代码列表查询门类 -->
+    <select id="selectCategoriesByCodes" resultMap="ArchiveCategoryResult">
+        <include refid="selectCategoryVo"/>
+        WHERE code IN
+        <foreach item="code" collection="codes" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+        ORDER BY sort_order ASC
+    </select>
+
+    <!-- 根据代码查询门类 -->
+    <select id="selectCategoryByCode" parameterType="String" resultMap="ArchiveCategoryResult">
+        <include refid="selectCategoryVo"/>
+        WHERE code = #{code}
+        LIMIT 1
+    </select>
+
+</mapper>

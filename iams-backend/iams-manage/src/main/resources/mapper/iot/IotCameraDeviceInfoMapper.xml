@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.iot.IotCameraDeviceInfoMapper">
+
+    <resultMap type="IotCameraDeviceInfo" id="IotCameraDeviceInfoResult">
+        <result property="deviceId"    column="device_id"    />
+        <result property="manufacturer"    column="manufacturer"    />
+        <result property="isNormal"    column="is_normal"    />
+        <result property="installationLocation"    column="installation_location"    />
+        <result property="deviceModel"    column="device_model"    />
+        <result property="installationDate"    column="installation_date"    />
+        <result property="lastMaintenanceDate"    column="last_maintenance_date"    />
+        <result property="ipAddress"    column="ip_address"    />
+        <result property="portNumber"    column="port_number"    />
+        <result property="password"    column="password"    />
+        <result property="remarks"    column="remarks"    />
+    </resultMap>
+
+    <sql id="selectIotCameraDeviceInfoVo">
+        select device_id, manufacturer, is_normal, installation_location, device_model, installation_date, last_maintenance_date, ip_address, port_number, password, remarks from iot_camera_device_info
+    </sql>
+
+    <select id="selectIotCameraDeviceInfoList" parameterType="IotCameraDeviceInfo" resultMap="IotCameraDeviceInfoResult">
+        <include refid="selectIotCameraDeviceInfoVo"/>
+        <where>
+            <if test="manufacturer != null  and manufacturer != ''"> and manufacturer like concat('%', #{manufacturer}, '%')</if>
+            <if test="isNormal != null "> and is_normal like concat('%', #{isNormal}, '%')</if>
+            <if test="installationLocation != null  and installationLocation != ''"> and installation_location like concat('%', #{installationLocation}, '%')</if>
+            <if test="deviceModel != null  and deviceModel != ''"> and device_model like concat('%', #{deviceModel}, '%')</if>
+            <if test="installationDate != null "> and installation_date like concat('%', #{installationDate}, '%')</if>
+            <if test="lastMaintenanceDate != null "> and last_maintenance_date like concat('%', #{lastMaintenanceDate}, '%')</if>
+            <if test="ipAddress != null  and ipAddress != ''"> and ip_address like concat('%', #{ipAddress}, '%')</if>
+            <if test="portNumber != null "> and port_number like concat('%', #{portNumber}, '%')</if>
+            <if test="password != null  and password != ''"> and password like concat('%', #{password}, '%')</if>
+            <if test="remarks != null  and remarks != ''"> and remarks like concat('%', #{remarks}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectIotCameraDeviceInfoByDeviceId" parameterType="String" resultMap="IotCameraDeviceInfoResult">
+        <include refid="selectIotCameraDeviceInfoVo"/>
+        where device_id = #{deviceId}
+    </select>
+
+    <insert id="insertIotCameraDeviceInfo" parameterType="IotCameraDeviceInfo">
+        insert into iot_camera_device_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null and deviceId != ''">device_id,</if>
+            <if test="manufacturer != null">manufacturer,</if>
+            <if test="isNormal != null">is_normal,</if>
+            <if test="installationLocation != null and installationLocation != ''">installation_location,</if>
+            <if test="deviceModel != null">device_model,</if>
+            <if test="installationDate != null">installation_date,</if>
+            <if test="lastMaintenanceDate != null">last_maintenance_date,</if>
+            <if test="ipAddress != null and ipAddress != ''">ip_address,</if>
+            <if test="portNumber != null">port_number,</if>
+            <if test="password != null">password,</if>
+            <if test="remarks != null">remarks,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deviceId != null and deviceId != ''">#{deviceId},</if>
+            <if test="manufacturer != null">#{manufacturer},</if>
+            <if test="isNormal != null">#{isNormal},</if>
+            <if test="installationLocation != null and installationLocation != ''">#{installationLocation},</if>
+            <if test="deviceModel != null">#{deviceModel},</if>
+            <if test="installationDate != null">#{installationDate},</if>
+            <if test="lastMaintenanceDate != null">#{lastMaintenanceDate},</if>
+            <if test="ipAddress != null and ipAddress != ''">#{ipAddress},</if>
+            <if test="portNumber != null">#{portNumber},</if>
+            <if test="password != null">#{password},</if>
+            <if test="remarks != null">#{remarks},</if>
+         </trim>
+    </insert>
+
+    <update id="updateIotCameraDeviceInfo" parameterType="IotCameraDeviceInfo">
+        update iot_camera_device_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="manufacturer != null">manufacturer = #{manufacturer},</if>
+            <if test="isNormal != null">is_normal = #{isNormal},</if>
+            <if test="installationLocation != null and installationLocation != ''">installation_location = #{installationLocation},</if>
+            <if test="deviceModel != null">device_model = #{deviceModel},</if>
+            <if test="installationDate != null">installation_date = #{installationDate},</if>
+            <if test="lastMaintenanceDate != null">last_maintenance_date = #{lastMaintenanceDate},</if>
+            <if test="ipAddress != null and ipAddress != ''">ip_address = #{ipAddress},</if>
+            <if test="portNumber != null">port_number = #{portNumber},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="remarks != null">remarks = #{remarks},</if>
+        </trim>
+        where device_id = #{deviceId}
+    </update>
+
+    <delete id="deleteIotCameraDeviceInfoByDeviceId" parameterType="String">
+        delete from iot_camera_device_info where device_id = #{deviceId}
+    </delete>
+
+    <delete id="deleteIotCameraDeviceInfoByDeviceIds" parameterType="String">
+        delete from iot_camera_device_info where device_id in
+        <foreach item="deviceId" collection="array" open="(" separator="," close=")">
+            #{deviceId}
+        </foreach>
+    </delete>
+</mapper>

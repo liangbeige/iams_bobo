@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.FilingRecordMapper">
+
+    <resultMap type="FilingRecord" id="FilingRecordResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="archiveId"    column="archive_id"    />
+        <result property="purpose"    column="purpose"    />
+        <result property="status"    column="status"    />
+        <result property="startApplyTime"    column="start_apply_time"    />
+        <result property="endApplyTime"    column="end_apply_time"    />
+        <result property="processName"    column="process_name"    />
+        <result property="businessKey"    column="business_key"    />
+        <result property="instanceId"    column="instance_id"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectFilingRecordVo">
+        select id, user_id, archive_id, purpose, status, start_apply_time, end_apply_time, process_name, business_key, instance_id, remark from tb_filing_record
+    </sql>
+
+    <select id="selectFilingRecordList" parameterType="FilingRecord" resultMap="FilingRecordResult">
+        <include refid="selectFilingRecordVo"/>
+        <where>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="archiveId != null "> and archive_id = #{archiveId}</if>
+            <if test="purpose != null  and purpose != ''"> and purpose = #{purpose}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="startApplyTime != null "> and start_apply_time = #{startApplyTime}</if>
+            <if test="endApplyTime != null "> and end_apply_time = #{endApplyTime}</if>
+            <if test="processName != null  and processName != ''"> and process_name like concat('%', #{processName}, '%')</if>
+            <if test="businessKey != null  and businessKey != ''"> and business_key = #{businessKey}</if>
+            <if test="instanceId != null  and instanceId != ''"> and instance_id = #{instanceId}</if>
+        </where>
+    </select>
+
+    <select id="selectFilingRecordById" parameterType="Long" resultMap="FilingRecordResult">
+        <include refid="selectFilingRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectFilingRecordByBusinessKey" parameterType="String" resultMap="FilingRecordResult">
+        <include refid="selectFilingRecordVo"/>
+        where business_key = #{businessKey}
+    </select>
+
+    <insert id="insertFilingRecord" parameterType="FilingRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_filing_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="archiveId != null">archive_id,</if>
+            <if test="purpose != null">purpose,</if>
+            <if test="status != null">status,</if>
+            <if test="startApplyTime != null">start_apply_time,</if>
+            <if test="endApplyTime != null">end_apply_time,</if>
+            <if test="processName != null">process_name,</if>
+            <if test="businessKey != null">business_key,</if>
+            <if test="instanceId != null">instance_id,</if>
+            <if test="remark != null">remark,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="purpose != null">#{purpose},</if>
+            <if test="status != null">#{status},</if>
+            <if test="startApplyTime != null">#{startApplyTime},</if>
+            <if test="endApplyTime != null">#{endApplyTime},</if>
+            <if test="processName != null">#{processName},</if>
+            <if test="businessKey != null">#{businessKey},</if>
+            <if test="instanceId != null">#{instanceId},</if>
+            <if test="remark != null">#{remark},</if>
+        </trim>
+    </insert>
+
+    <update id="updateFilingRecord" parameterType="FilingRecord">
+        update tb_filing_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="purpose != null">purpose = #{purpose},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="startApplyTime != null">start_apply_time = #{startApplyTime},</if>
+            <if test="endApplyTime != null">end_apply_time = #{endApplyTime},</if>
+            <if test="processName != null">process_name = #{processName},</if>
+            <if test="businessKey != null">business_key = #{businessKey},</if>
+            <if test="instanceId != null">instance_id = #{instanceId},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFilingRecordById" parameterType="Long">
+        delete from tb_filing_record where id = #{id}
+    </delete>
+
+    <delete id="deleteFilingRecordByIds" parameterType="String">
+        delete from tb_filing_record where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

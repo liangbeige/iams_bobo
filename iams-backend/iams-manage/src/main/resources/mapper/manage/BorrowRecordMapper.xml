@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.BorrowRecordMapper">
+    
+    <resultMap type="BorrowRecord" id="BorrowRecordResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="archiveId"    column="archive_id"    />
+        <result property="startDate"    column="start_date"    />
+        <result property="endDate"    column="end_date"    />
+        <result property="purpose"    column="purpose"    />
+        <result property="status"    column="status"    />
+        <result property="borrowDate"    column="borrow_date"    />
+        <result property="returnDate"    column="return_date"    />
+        <result property="overdueDays"    column="overdue_days"    />
+        <result property="startApplyTime"    column="start_apply_time"    />
+        <result property="endApplyTime"    column="end_apply_time"    />
+        <result property="processName"    column="process_name"    />
+        <result property="businessKey"    column="business_key"    />
+        <result property="instanceId"    column="instance_id"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectBorrowRecordVo">
+        select id, user_id, archive_id, start_date, end_date, purpose, status, borrow_date, return_date, overdue_days, start_apply_time, end_apply_time, process_name, business_key, instance_id, remark from tb_borrow_record
+    </sql>
+
+    <select id="selectBorrowRecordList" parameterType="BorrowRecord" resultMap="BorrowRecordResult">
+        <include refid="selectBorrowRecordVo"/>
+        <where>  
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="userName != null "> and user_id IN (select user_id from sys_user_info where user_name like concat('%', #{userName}, '%') )</if>
+            <if test="archiveId != null "> and archive_id = #{archiveId}</if>
+            <if test="archiveDanghao != null and archiveDanghao != ''"> and archive_id IN (select id from tb_archive where danghao like concat('%', #{archiveDanghao}, '%')) </if>
+            <if test="startDate != null "> and start_date = #{startDate}</if>
+            <if test="endDate != null "> and end_date = #{endDate}</if>
+            <if test="purpose != null  and purpose != ''"> and purpose = #{purpose}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="borrowDate != null "> and borrow_date = #{borrowDate}</if>
+            <if test="returnDate != null "> and return_date = #{returnDate}</if>
+            <if test="overdueDays != null "> and overdue_days = #{overdueDays}</if>
+            <if test="startApplyTime != null "> and start_apply_time = #{startApplyTime}</if>
+            <if test="endApplyTime != null "> and end_apply_time = #{endApplyTime}</if>
+            <if test="processName != null  and processName != ''"> and process_name like concat('%', #{processName}, '%')</if>
+            <if test="businessKey != null  and businessKey != ''"> and business_key = #{businessKey}</if>
+            <if test="instanceId != null  and instanceId != ''"> and instance_id = #{instanceId}</if>
+<!--            <if test="fondsId != null and fondsId != ''"> and archive_id IN (select id from tb_archive where fonds_id like concat('%', #{fondsId}, '%') )</if>-->
+        </where>
+        ORDER BY id desc
+    </select>
+    
+    <select id="selectBorrowRecordById" parameterType="Long" resultMap="BorrowRecordResult">
+        <include refid="selectBorrowRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectBorrowRecordByBusinessKey" parameterType="String" resultMap="BorrowRecordResult">
+        <include refid="selectBorrowRecordVo"/>
+        where business_key = #{businessKey}
+    </select>
+
+    <select id="selectBorrowRecordByArchiveId" parameterType="Long" resultMap="BorrowRecordResult">
+        <include refid="selectBorrowRecordVo"/>
+        where archive_id = #{archiveId}
+    </select>
+
+    <insert id="insertBorrowRecord" parameterType="BorrowRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_borrow_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="archiveId != null">archive_id,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="endDate != null">end_date,</if>
+            <if test="purpose != null">purpose,</if>
+            <if test="status != null">status,</if>
+            <if test="borrowDate != null">borrow_date,</if>
+            <if test="returnDate != null">return_date,</if>
+            <if test="overdueDays != null">overdue_days,</if>
+            <if test="startApplyTime != null">start_apply_time,</if>
+            <if test="endApplyTime != null">end_apply_time,</if>
+            <if test="processName != null">process_name,</if>
+            <if test="businessKey != null">business_key,</if>
+            <if test="instanceId != null">instance_id,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="endDate != null">#{endDate},</if>
+            <if test="purpose != null">#{purpose},</if>
+            <if test="status != null">#{status},</if>
+            <if test="borrowDate != null">#{borrowDate},</if>
+            <if test="returnDate != null">#{returnDate},</if>
+            <if test="overdueDays != null">#{overdueDays},</if>
+            <if test="startApplyTime != null">#{startApplyTime},</if>
+            <if test="endApplyTime != null">#{endApplyTime},</if>
+            <if test="processName != null">#{processName},</if>
+            <if test="businessKey != null">#{businessKey},</if>
+            <if test="instanceId != null">#{instanceId},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBorrowRecord" parameterType="BorrowRecord">
+        update tb_borrow_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="purpose != null">purpose = #{purpose},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="borrowDate != null">borrow_date = #{borrowDate},</if>
+            <if test="returnDate != null">return_date = #{returnDate},</if>
+            <if test="overdueDays != null">overdue_days = #{overdueDays},</if>
+            <if test="startApplyTime != null">start_apply_time = #{startApplyTime},</if>
+            <if test="endApplyTime != null">end_apply_time = #{endApplyTime},</if>
+            <if test="processName != null">process_name = #{processName},</if>
+            <if test="businessKey != null">business_key = #{businessKey},</if>
+            <if test="instanceId != null">instance_id = #{instanceId},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBorrowRecordById" parameterType="Long">
+        delete from tb_borrow_record where id = #{id}
+    </delete>
+
+    <delete id="deleteBorrowRecordByIds" parameterType="String">
+        delete from tb_borrow_record where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.iot.CabinetConfigMapper">
+
+    <resultMap type="CabinetConfig" id="CabinetConfigResult">
+        <id     property="id"       column="id"        />
+        <result property="configData"    column="config_data"    />
+        <result property="createTime"  column="create_time"  />
+        <result property="company"  column="company"  />
+        <result property="warehouse"  column="warehouse"  />
+        <result property="scheme"  column="scheme"  />
+    </resultMap>
+
+    <insert id="insertCabinetConfig" parameterType="CabinetConfig" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cabinet_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            company,
+            warehouse,
+            scheme,
+            config_data,
+            create_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            #{company},
+            #{warehouse},
+            #{scheme},
+            #{configData},
+            now(),
+        </trim>
+    </insert>
+
+    <select id="selectCabinetConfigList" parameterType="CabinetConfig" resultMap="CabinetConfigResult">
+        SELECT id, config_data, create_time, company, warehouse, scheme FROM cabinet_config
+    </select>
+
+    <select id="selectCabinetByAttr" parameterType="CabinetConfig" resultType="int">
+        SELECT COUNT(*) FROM cabinet_config
+        <where>
+            <if test="company != null and company != ''"> AND company = #{company} </if>
+            <if test="warehouse != null and warehouse != ''"> AND warehouse = #{warehouse} </if>
+            <if test="scheme != null and scheme != ''"> AND scheme = #{scheme} </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <update id="updateCabinetConfig" parameterType="CabinetConfig">
+        UPDATE cabinet_config
+        SET config_data = #{configData},
+            create_time = now()
+        WHERE warehouse = #{warehouse}
+          AND company = #{company}
+          AND scheme = #{scheme}
+    </update>
+</mapper>

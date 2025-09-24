@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.iot.IotAirConditionerMapper">
+
+    <resultMap type="IotAirConditioner" id="IotAirConditionerResult">
+        <result property="id"    column="id"    />
+        <result property="brand"    column="brand"    />
+        <result property="model"    column="model"    />
+        <result property="energyEfficiency"    column="energy_efficiency"    />
+        <result property="power"    column="power"    />
+        <result property="productionDate"    column="production_date"    />
+        <result property="warrantyPeriod"    column="warranty_period"    />
+        <result property="price"    column="price"    />
+        <result property="filterReplacementCycle"    column="filter_replacement_cycle"    />
+    </resultMap>
+
+    <sql id="selectIotAirConditionerVo">
+        select id, brand, model, energy_efficiency, power, production_date, warranty_period, price, filter_replacement_cycle from iot_air_conditioner
+    </sql>
+
+    <select id="selectIotAirConditionerList" parameterType="IotAirConditioner" resultMap="IotAirConditionerResult">
+        <include refid="selectIotAirConditionerVo"/>
+        <where>
+            <if test="brand != null  and brand != ''"> and brand like concat('%', #{brand}, '%')</if>
+            <if test="model != null  and model != ''"> and model like concat('%', #{model}, '%')</if>
+            <if test="energyEfficiency != null  and energyEfficiency != ''"> and energy_efficiency like concat('%', #{energyEfficiency}, '%')</if>
+            <if test="power != null "> and power = #{power}</if>
+        </where>
+    </select>
+
+    <select id="selectIotAirConditionerById" parameterType="String" resultMap="IotAirConditionerResult">
+        <include refid="selectIotAirConditionerVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertIotAirConditioner" parameterType="IotAirConditioner">
+        insert into iot_air_conditioner
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="brand != null and brand != ''">brand,</if>
+            <if test="model != null and model != ''">model,</if>
+            <if test="energyEfficiency != null and energyEfficiency != ''">energy_efficiency,</if>
+            <if test="power != null">power,</if>
+            <if test="productionDate != null">production_date,</if>
+            <if test="warrantyPeriod != null">warranty_period,</if>
+            <if test="price != null">price,</if>
+            <if test="filterReplacementCycle != null">filter_replacement_cycle,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="brand != null and brand != ''">#{brand},</if>
+            <if test="model != null and model != ''">#{model},</if>
+            <if test="energyEfficiency != null and energyEfficiency != ''">#{energyEfficiency},</if>
+            <if test="power != null">#{power},</if>
+            <if test="productionDate != null">#{productionDate},</if>
+            <if test="warrantyPeriod != null">#{warrantyPeriod},</if>
+            <if test="price != null">#{price},</if>
+            <if test="filterReplacementCycle != null">#{filterReplacementCycle},</if>
+         </trim>
+    </insert>
+
+    <update id="updateIotAirConditioner" parameterType="IotAirConditioner">
+        update iot_air_conditioner
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="brand != null and brand != ''">brand = #{brand},</if>
+            <if test="model != null and model != ''">model = #{model},</if>
+            <if test="energyEfficiency != null and energyEfficiency != ''">energy_efficiency = #{energyEfficiency},</if>
+            <if test="power != null">power = #{power},</if>
+            <if test="productionDate != null">production_date = #{productionDate},</if>
+            <if test="warrantyPeriod != null">warranty_period = #{warrantyPeriod},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="filterReplacementCycle != null">filter_replacement_cycle = #{filterReplacementCycle},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteIotAirConditionerById" parameterType="String">
+        delete from iot_air_conditioner where id = #{id}
+    </delete>
+
+    <delete id="deleteIotAirConditionerByIds" parameterType="String">
+        delete from iot_air_conditioner where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getTopicById" resultType="java.lang.String">
+        SELECT s.mqtt_topic
+        FROM iot_air_conditioner a
+                 JOIN iot_sensor s ON a.id = s.sensor_id
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="selectLastIotAirConditioner" resultMap="IotAirConditionerResult">
+        <include refid="selectIotAirConditionerVo"/>
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+</mapper>

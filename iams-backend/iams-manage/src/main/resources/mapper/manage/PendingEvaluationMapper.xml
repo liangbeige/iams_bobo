@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.PendingEvaluationMapper">
+
+    <resultMap type="PendingEvaluation" id="PendingEvaluationResult">
+        <result property="id"    column="id"    />
+        <result property="archiveId"    column="archive_id"    />
+        <result property="evaluationReason"    column="evaluation_reason"    />
+        <result property="status"    column="status"    />
+        <result property="createdAt"    column="created_at"    />
+    </resultMap>
+
+    <sql id="selectPendingEvaluationVo">
+        select id, archive_id, evaluation_reason, status, created_at from tb_pending_evaluation
+    </sql>
+
+    <select id="selectPendingEvaluationList" parameterType="PendingEvaluation" resultMap="PendingEvaluationResult">
+        <include refid="selectPendingEvaluationVo"/>
+        <where>
+            <if test="archiveId != null "> and archive_id = #{archiveId}</if>
+            <if test="evaluationReason != null  and evaluationReason != ''"> and evaluation_reason = #{evaluationReason}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="createdAt != null "> and created_at = #{createdAt}</if>
+        </where>
+    </select>
+
+    <select id="selectPendingEvaluationById" parameterType="Long" resultMap="PendingEvaluationResult">
+        <include refid="selectPendingEvaluationVo"/>
+        where id = #{id}
+    </select>
+
+
+
+    <select id="selectPendingEvaluationByArchiveId" parameterType="Long" resultMap="PendingEvaluationResult">
+        <include refid="selectPendingEvaluationVo"/>
+        where archive_id = #{archiveId}
+    </select>
+
+    <insert id="insertPendingEvaluation" parameterType="PendingEvaluation" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_pending_evaluation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">archive_id,</if>
+            <if test="evaluationReason != null and evaluationReason != ''">evaluation_reason,</if>
+            <if test="status != null">status,</if>
+            <if test="createdAt != null">created_at,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="evaluationReason != null and evaluationReason != ''">#{evaluationReason},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+        </trim>
+    </insert>
+
+    <update id="updatePendingEvaluation" parameterType="PendingEvaluation">
+        update tb_pending_evaluation
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="evaluationReason != null and evaluationReason != ''">evaluation_reason = #{evaluationReason},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createdAt != null">created_at = #{createdAt},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deletePendingEvaluationById" parameterType="Long">
+        delete from tb_pending_evaluation where id = #{id}
+    </delete>
+
+    <delete id="deletePendingEvaluationByIds" parameterType="String">
+        delete from tb_pending_evaluation where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

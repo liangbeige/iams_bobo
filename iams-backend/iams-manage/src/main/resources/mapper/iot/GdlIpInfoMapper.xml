@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.iot.GdlIpInfoMapper">
+
+    <resultMap type="GdlIpInfo" id="GdlIpInfoResult">
+        <result property="gdlNo"    column="gdl_no"    />
+        <result property="gdlName"    column="gdl_name"    />
+        <result property="gdlIp"    column="gdl_ip"    />
+        <result property="gdlPort"    column="gdl_port"    />
+        <result property="gdlRemark"    column="gdl_remark"    />
+    </resultMap>
+
+    <sql id="selectGdlIpInfoVo">
+        select gdl_no, gdl_name, gdl_ip, gdl_port, gdl_remark from gdl_ip_info
+    </sql>
+
+    <select id="selectGdlIpInfoList" parameterType="GdlIpInfo" resultMap="GdlIpInfoResult">
+        <include refid="selectGdlIpInfoVo"/>
+        <where>
+            <if test="gdlName != null  and gdlName != ''"> and gdl_name like concat('%', #{gdlName}, '%')</if>
+            <if test="gdlIp != null  and gdlIp != ''"> and gdl_ip like concat('%', #{gdlIp}, '%')</if>
+            <if test="gdlPort != null "> and gdl_port like concat('%', #{gdlPort}, '%')</if>
+            <if test="gdlRemark != null  and gdlRemark != ''"> and gdl_remark like concat('%', #{gdlRemark}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectGdlIpInfoByGdlNo" parameterType="int" resultMap="GdlIpInfoResult">
+        <include refid="selectGdlIpInfoVo"/>
+        where gdl_no = #{gdlNo}
+    </select>
+
+    <insert id="insertGdlIpInfo" parameterType="GdlIpInfo">
+        insert into gdl_ip_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="gdlNo != null">gdl_no,</if>
+            <if test="gdlName != null">gdl_name,</if>
+            <if test="gdlIp != null">gdl_ip,</if>
+            <if test="gdlPort != null">gdl_port,</if>
+            <if test="gdlRemark != null">gdl_remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="gdlNo != null">#{gdlNo},</if>
+            <if test="gdlName != null">#{gdlName},</if>
+            <if test="gdlIp != null">#{gdlIp},</if>
+            <if test="gdlPort != null">#{gdlPort},</if>
+            <if test="gdlRemark != null">#{gdlRemark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateGdlIpInfo" parameterType="GdlIpInfo">
+        update gdl_ip_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="gdlName != null">gdl_name = #{gdlName},</if>
+            <if test="gdlIp != null">gdl_ip = #{gdlIp},</if>
+            <if test="gdlPort != null">gdl_port = #{gdlPort},</if>
+            <if test="gdlRemark != null">gdl_remark = #{gdlRemark},</if>
+        </trim>
+        where gdl_no = #{gdlNo}
+    </update>
+
+    <delete id="deleteGdlIpInfoByGdlNo" parameterType="int">
+        delete from gdl_ip_info where gdl_no = #{gdlNo}
+    </delete>
+
+    <delete id="deleteGdlIpInfoByGdlNos" parameterType="int">
+        delete from gdl_ip_info where gdl_no in
+        <foreach item="gdlNo" collection="array" open="(" separator="," close=")">
+            #{gdlNo}
+        </foreach>
+    </delete>
+</mapper>

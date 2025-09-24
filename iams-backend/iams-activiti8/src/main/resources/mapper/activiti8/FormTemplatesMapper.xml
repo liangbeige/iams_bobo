@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.activiti8.mapper.FormTemplatesMapper">
+
+    <resultMap type="FormTemplates" id="FormTemplatesResult">
+        <result property="id"    column="id"    />
+        <result property="formKey"    column="form_key"    />
+        <result property="formName"    column="form_name"    />
+        <result property="templatePath"    column="template_path"    />
+        <result property="createdTime"    column="created_time"    />
+    </resultMap>
+
+    <sql id="selectFormTemplatesVo">
+        select id, form_key, form_name, template_path, created_time from tb_form_templates
+    </sql>
+
+    <select id="selectFormTemplatesList" parameterType="FormTemplates" resultMap="FormTemplatesResult">
+        <include refid="selectFormTemplatesVo"/>
+        <where>
+            <if test="formKey != null  and formKey != ''"> and form_key = #{formKey}</if>
+            <if test="formName != null  and formName != ''"> and form_name like concat('%', #{formName}, '%')</if>
+            <if test="templatePath != null  and templatePath != ''"> and template_path = #{templatePath}</if>
+            <if test="createdTime != null "> and created_time = #{createdTime}</if>
+        </where>
+    </select>
+
+    <select id="selectFormTemplatesById" parameterType="Long" resultMap="FormTemplatesResult">
+        <include refid="selectFormTemplatesVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectFormTemplatesFormKey" parameterType="String" resultMap="FormTemplatesResult">
+        <include refid="selectFormTemplatesVo"/>
+        where form_key = #{name}
+    </select>
+
+    <insert id="insertFormTemplates" parameterType="FormTemplates" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_form_templates
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="formKey != null and formKey != ''">form_key,</if>
+            <if test="formName != null and formName != ''">form_name,</if>
+            <if test="templatePath != null and templatePath != ''">template_path,</if>
+            <if test="createdTime != null">created_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="formKey != null and formKey != ''">#{formKey},</if>
+            <if test="formName != null and formName != ''">#{formName},</if>
+            <if test="templatePath != null and templatePath != ''">#{templatePath},</if>
+            <if test="createdTime != null">#{createdTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateFormTemplates" parameterType="FormTemplates">
+        update tb_form_templates
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="formKey != null and formKey != ''">form_key = #{formKey},</if>
+            <if test="formName != null and formName != ''">form_name = #{formName},</if>
+            <if test="templatePath != null and templatePath != ''">template_path = #{templatePath},</if>
+            <if test="createdTime != null">created_time = #{createdTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFormTemplatesById" parameterType="Long">
+        delete from tb_form_templates where id = #{id}
+    </delete>
+
+    <delete id="deleteFormTemplatesByIds" parameterType="String">
+        delete from tb_form_templates where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

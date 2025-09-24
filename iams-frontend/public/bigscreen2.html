@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>智慧档案管理系统管控平台</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<style>
+		:root {
+			--primary: #1a73e8;
+			--primary-dark: #0d47a1;
+			--secondary: #26a69a;
+			--accent: #ff7043;
+			--light-bg: #f5f7fa;
+			--dark-bg: #1e293b;
+			--card-bg: #ffffff;
+			--text-dark: #2d3748;
+			--text-light: #718096;
+			--success: #10b981;
+			--warning: #f59e0b;
+			--danger: #ef4444;
+			--shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		}
+
+		body {
+			background: linear-gradient(135deg, var(--light-bg) 0%, #e2e8f0 100%);
+			color: var(--text-dark);
+			min-height: 100vh;
+			padding: 20px;
+		}
+
+		.container {
+			max-width: 1400px;
+			margin: 0 auto;
+		}
+
+		header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 20px 0;
+			margin-bottom: 30px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+		}
+
+		.logo {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+		}
+
+		.logo-icon {
+			width: 50px;
+			height: 50px;
+			background: var(--primary);
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: white;
+			font-size: 24px;
+		}
+
+		.logo-text h1 {
+			font-size: 28px;
+			font-weight: 700;
+			color: var(--dark-bg);
+		}
+
+		.logo-text p {
+			font-size: 14px;
+			color: var(--text-light);
+			margin-top: 5px;
+		}
+
+		.datetime {
+			text-align: right;
+			font-size: 16px;
+			color: var(--text-light);
+		}
+
+		.stats-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+			gap: 20px;
+			margin-bottom: 30px;
+		}
+
+		.stat-card {
+			background: var(--card-bg);
+			border-radius: 16px;
+			padding: 25px;
+			box-shadow: var(--shadow);
+			transition: transform 0.3s ease;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.stat-card:hover {
+			transform: translateY(-5px);
+		}
+
+		.stat-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 15px;
+		}
+
+		.stat-icon {
+			width: 50px;
+			height: 50px;
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-right: 15px;
+			font-size: 22px;
+		}
+
+		.icon-1 {
+			background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+		}
+
+		.icon-2 {
+			background: linear-gradient(135deg, var(--secondary) 0%, #00897b 100%);
+		}
+
+		.icon-3 {
+			background: linear-gradient(135deg, var(--accent) 0%, #e64a19 100%);
+		}
+
+		.icon-4 {
+			background: linear-gradient(135deg, #8e24aa 0%, #4a148c 100%);
+		}
+
+		.stat-title {
+			font-size: 16px;
+			font-weight: 600;
+			color: var(--text-light);
+		}
+
+		.stat-value {
+			font-size: 32px;
+			font-weight: 700;
+			margin-bottom: 5px;
+		}
+
+		.stat-change {
+			font-size: 14px;
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+
+		.change-positive {
+			color: var(--success);
+		}
+
+		.change-negative {
+			color: var(--danger);
+		}
+
+		.content-grid {
+			display: grid;
+			grid-template-columns: 2fr 1fr;
+			gap: 25px;
+			margin-bottom: 30px;
+		}
+
+		.chart-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 25px;
+			margin-bottom: 30px;
+		}
+
+		.card {
+			background: var(--card-bg);
+			border-radius: 16px;
+			padding: 25px;
+			box-shadow: var(--shadow);
+		}
+
+		.card-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20px;
+			padding-bottom: 15px;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+		}
+
+		.card-title {
+			font-size: 18px;
+			font-weight: 600;
+			color: var(--dark-bg);
+		}
+
+		.chart-container {
+			position: relative;
+			height: 300px;
+		}
+
+		.recent-activity {
+			max-height: 400px;
+			overflow-y: auto;
+		}
+
+		.activity-item {
+			display: flex;
+			padding: 15px 0;
+			border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+		}
+
+		.activity-icon {
+			width: 40px;
+			height: 40px;
+			border-radius: 10px;
+			background: var(--light-bg);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin-right: 15px;
+			color: var(--primary);
+		}
+
+		.activity-details {
+			flex: 1;
+		}
+
+		.activity-title {
+			font-weight: 600;
+			margin-bottom: 5px;
+		}
+
+		.activity-time {
+			font-size: 13px;
+			color: var(--text-light);
+		}
+
+		.activity-value {
+			font-weight: 700;
+			color: var(--primary);
+		}
+
+		.api-demo {
+			margin-top: 30px;
+		}
+
+		.api-title {
+			font-size: 24px;
+			margin-bottom: 20px;
+			text-align: center;
+			color: var(--dark-bg);
+		}
+
+		.api-description {
+			text-align: center;
+			color: var(--text-light);
+			margin-bottom: 40px;
+			max-width: 800px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		.api-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 25px;
+			margin-bottom: 40px;
+		}
+
+		.api-card {
+			background: var(--card-bg);
+			border-radius: 16px;
+			padding: 25px;
+			box-shadow: var(--shadow);
+			transition: all 0.3s ease;
+		}
+
+		.api-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+		}
+
+		.api-card-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 20px;
+		}
+
+		.api-icon {
+			width: 50px;
+			height: 50px;
+			background: var(--primary);
+			border-radius: 12px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: white;
+			font-size: 20px;
+			margin-right: 15px;
+		}
+
+		.api-card-title {
+			font-size: 18px;
+			font-weight: 600;
+		}
+
+		.api-card-description {
+			color: var(--text-light);
+			margin-bottom: 20px;
+			min-height: 60px;
+		}
+
+		.api-example {
+			background: var(--light-bg);
+			border-radius: 8px;
+			padding: 15px;
+			font-family: monospace;
+			font-size: 14px;
+			margin-bottom: 20px;
+			overflow-x: auto;
+		}
+
+		.api-button {
+			background: var(--primary);
+			color: white;
+			border: none;
+			padding: 10px 20px;
+			border-radius: 8px;
+			cursor: pointer;
+			font-weight: 600;
+			transition: background 0.3s ease;
+			display: block;
+			width: 100%;
+		}
+
+		.api-button:hover {
+			background: var(--primary-dark);
+		}
+
+		.api-response {
+			background: var(--dark-bg);
+			color: #e2e8f0;
+			border-radius: 8px;
+			padding: 15px;
+			font-family: monospace;
+			font-size: 14px;
+			margin-top: 15px;
+			max-height: 200px;
+			overflow-y: auto;
+			display: none;
+		}
+
+		footer {
+			text-align: center;
+			padding: 30px 0;
+			color: var(--text-light);
+			font-size: 14px;
+			border-top: 1px solid rgba(0, 0, 0, 0.1);
+			margin-top: 40px;
+		}
+
+		@media (max-width: 992px) {
+			.content-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.chart-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		@media (max-width: 768px) {
+			.stats-grid {
+				grid-template-columns: 1fr;
+			}
+
+			header {
+				flex-direction: column;
+				text-align: center;
+				gap: 15px;
+			}
+
+			.logo {
+				justify-content: center;
+			}
+
+			.datetime {
+				text-align: center;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<header>
+			<div class="logo">
+				<div class="logo-icon">
+					<i class="fas fa-archive"></i>
+				</div>
+				<div class="logo-text">
+					<h1>智慧档案管理系统管控平台</h1>
+					<p>智能化管理档案资源，提升档案利用效率</p>
+				</div>
+			</div>
+			<div class="datetime">
+				<div id="current-date">2023年10月15日 星期日</div>
+				<div id="current-time">14:28:36</div>
+			</div>
+		</header>
+
+		<div class="stats-grid">
+			<div class="stat-card">
+				<div class="stat-header">
+					<div class="stat-icon icon-1">
+						<i class="fas fa-boxes"></i>
+					</div>
+					<div>
+						<div class="stat-title">档案总数</div>
+						<div class="stat-value" id="total-archives">12,584</div>
+					</div>
+				</div>
+				<div class="stat-change change-positive">
+					<i class="fas fa-arrow-up"></i>
+					<span>较上月增加 3.2%</span>
+				</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-header">
+					<div class="stat-icon icon-2">
+						<i class="fas fa-book-open"></i>
+					</div>
+					<div>
+						<div class="stat-title">借阅总量</div>
+						<div class="stat-value" id="total-borrows">8,426</div>
+					</div>
+				</div>
+				<div class="stat-change change-positive">
+					<i class="fas fa-arrow-up"></i>
+					<span>较上月增加 5.7%</span>
+				</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-header">
+					<div class="stat-icon icon-3">
+						<i class="fas fa-clock"></i>
+					</div>
+					<div>
+						<div class="stat-title">待归还档案</div>
+						<div class="stat-value" id="pending-returns">324</div>
+					</div>
+				</div>
+				<div class="stat-change change-negative">
+					<i class="fas fa-arrow-down"></i>
+					<span>较上月增加 2.1%</span>
+				</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-header">
+					<div class="stat-icon icon-4">
+						<i class="fas fa-file-alt"></i>
+					</div>
+					<div>
+						<div class="stat-title">新增档案</div>
+						<div class="stat-value" id="new-archives">284</div>
+					</div>
+				</div>
+				<div class="stat-change change-positive">
+					<i class="fas fa-arrow-up"></i>
+					<span>本月新增</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="content-grid">
+			<div class="card">
+				<div class="card-header">
+					<div class="card-title">档案借阅趋势</div>
+					<div class="card-actions">
+						<select id="time-range">
+							<option value="7">最近7天</option>
+							<option value="30">最近30天</option>
+							<option value="90">最近90天</option>
+						</select>
+					</div>
+				</div>
+				<div class="chart-container">
+					<canvas id="borrow-trend-chart"></canvas>
+				</div>
+			</div>
+			<div class="card recent-activity">
+				<div class="card-header">
+					<div class="card-title">最近借阅记录</div>
+				</div>
+				<div id="recent-activities">
+					<div class="activity-item">
+						<div class="activity-icon">
+							<i class="fas fa-book"></i>
+						</div>
+						<div class="activity-details">
+							<div class="activity-title">张伟 借阅档案</div>
+							<div class="activity-time">2023-10-15 13:45:22</div>
+						</div>
+						<div class="activity-value">3册</div>
+					</div>
+					<div class="activity-item">
+						<div class="activity-icon">
+							<i class="fas fa-book"></i>
+						</div>
+						<div class="activity-details">
+							<div class="activity-title">王芳 归还档案</div>
+							<div class="activity-time">2023-10-15 11:23:10</div>
+						</div>
+						<div class="activity-value">5册</div>
+					</div>
+					<div class="activity-item">
+						<div class="activity-icon">
+							<i class="fas fa-book"></i>
+						</div>
+						<div class="activity-details">
+							<div class="activity-title">李强 借阅档案</div>
+							<div class="activity-time">2023-10-14 16:45:33</div>
+						</div>
+						<div class="activity-value">2册</div>
+					</div>
+					<div class="activity-item">
+						<div class="activity-icon">
+							<i class="fas fa-plus-circle"></i>
+						</div>
+						<div class="activity-details">
+							<div class="activity-title">新增档案入库</div>
+							<div class="activity-time">2023-10-14 10:15:08</div>
+						</div>
+						<div class="activity-value">28册</div>
+					</div>
+					<div class="activity-item">
+						<div class="activity-icon">
+							<i class="fas fa-book"></i>
+						</div>
+						<div class="activity-details">
+							<div class="activity-title">赵敏 借阅档案</div>
+							<div class="activity-time">2023-10-13 14:22:45</div>
+						</div>
+						<div class="activity-value">4册</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="chart-grid">
+			<div class="card">
+				<div class="card-header">
+					<div class="card-title">档案类型分布</div>
+				</div>
+				<div class="chart-container">
+					<canvas id="type-distribution-chart"></canvas>
+				</div>
+			</div>
+			<div class="card">
+				<div class="card-header">
+					<div class="card-title">档案状态分析</div>
+				</div>
+				<div class="chart-container">
+					<canvas id="status-chart"></canvas>
+				</div>
+			</div>
+		</div>
+
+		<div class="api-demo">
+			<h2 class="api-title">档案管理API演示</h2>
+			<p class="api-description">以下展示了如何在HTML中实现类似Vue的API引入方式，调用档案管理系统的后端接口</p>
+
+			<div class="api-grid">
+				<div class="api-card">
+					<div class="api-card-header">
+						<div class="api-icon">
+							<i class="fas fa-list"></i>
+						</div>
+						<div class="api-card-title">查询统计数据列表</div>
+					</div>
+					<div class="api-card-description">
+						获取档案统计数据的列表，支持分页和条件查询
+					</div>
+					<div class="api-example">
+						listStatistics({ page: 1, size: 10, type: '电子档案' })
+					</div>
+					<button class="api-button" onclick="callListStatistics()">调用API</button>
+					<div class="api-response" id="list-response"></div>
+				</div>
+
+				<div class="api-card">
+					<div class="api-card-header">
+						<div class="api-icon">
+							<i class="fas fa-chart-line"></i>
+						</div>
+						<div class="api-card-title">获取最新统计数据</div>
+					</div>
+					<div class="api-card-description">
+						获取最新的档案统计数据，用于展示在仪表盘
+					</div>
+					<div class="api-example">
+						getLatestStatistics()
+					</div>
+					<button class="api-button" onclick="callGetLatestStatistics()">调用API</button>
+					<div class="api-response" id="latest-response"></div>
+				</div>
+
+				<div class="api-card">
+					<div class="api-card-header">
+						<div class="api-icon">
+							<i class="fas fa-calendar-day"></i>
+						</div>
+						<div class="api-card-title">获取日统计数据</div>
+					</div>
+					<div class="api-card-description">
+						获取指定日期的档案统计数据
+					</div>
+					<div class="api-example">
+						getDailyStatistics(new Date())
+					</div>
+					<button class="api-button" onclick="callGetDailyStatistics()">调用API</button>
+					<div class="api-response" id="daily-response"></div>
+				</div>
+			</div>
+		</div>
+
+		<footer>
+			<p>智慧档案管理系统管控平台 © 2023 版权所有 | 技术支持: 信息中心</p>
+		</footer>
+	</div>
+
+	<script>
+		// 模拟API实现
+		const api = {
+			// 查询统计数据列表
+			listStatistics: function (query) {
+				return new Promise((resolve) => {
+					// 模拟API延迟
+					setTimeout(() => {
+						const data = {
+							code: 200,
+							msg: "操作成功",
+							data: {
+								total: 125,
+								list: Array.from({ length: 10 }, (_, i) => ({
+									id: i + 1,
+									date: dayjs().subtract(i, 'day').format('YYYY-MM-DD'),
+									archivedCount: Math.floor(Math.random() * 100) + 50,
+									borrowCount: Math.floor(Math.random() * 80) + 20,
+									returnCount: Math.floor(Math.random() * 70) + 15,
+									type: ['电子档案', '纸质档案', '声像档案'][Math.floor(Math.random() * 3)]
+								}))
+							}
+						};
+						resolve(data);
+					}, 800);
+				});
+			},
+
+			// 查询最新一条数据
+			getLatestStatistics: function () {
+				return new Promise((resolve) => {
+					setTimeout(() => {
+						const data = {
+							code: 200,
+							msg: "操作成功",
+							data: {
+								id: 1,
+								date: dayjs().format('YYYY-MM-DD'),
+								archivedCount: 12584,
+								borrowCount: 8426,
+								returnCount: 8102,
+								pendingCount: 324,
+								electronicCount: 7452,
+								physicalCount: 5132
+							}
+						};
+						resolve(data);
+					}, 600);
+				});
+			},
+
+			// 获取日统计数据
+			getDailyStatistics: function (date) {
+				return new Promise((resolve) => {
+					setTimeout(() => {
+						const data = {
+							code: 200,
+							msg: "操作成功",
+							data: {
+								date: dayjs(date).format('YYYY-MM-DD'),
+								archivedCount: Math.floor(Math.random() * 100) + 50,
+								borrowCount: Math.floor(Math.random() * 80) + 20,
+								returnCount: Math.floor(Math.random() * 70) + 15,
+								pendingCount: Math.floor(Math.random() * 30) + 5
+							}
+						};
+						resolve(data);
+					}, 700);
+				});
+			},
+
+			// 获取最近几天的借出数量数据
+			getRecentBorrowData: function (days = 7) {
+				return new Promise((resolve) => {
+					setTimeout(() => {
+						const data = {
+							code: 200,
+							msg: "操作成功",
+							data: Array.from({ length: days }, (_, i) => ({
+								date: dayjs().subtract(days - i - 1, 'day').format('MM-DD'),
+								borrowCount: Math.floor(Math.random() * 100) + 30
+							}))
+						};
+						resolve(data);
+					}, 900);
+				});
+			}
+		};
+
+		// 调用API的函数
+		function callListStatistics() {
+			const responseElement = document.getElementById('list-response');
+			responseElement.style.display = 'block';
+			responseElement.textContent = "调用中...";
+
+			api.listStatistics({ page: 1, size: 10 }).then(response => {
+				responseElement.textContent = JSON.stringify(response, null, 2);
+			});
+		}
+
+		function callGetLatestStatistics() {
+			const responseElement = document.getElementById('latest-response');
+			responseElement.style.display = 'block';
+			responseElement.textContent = "调用中...";
+
+			api.getLatestStatistics().then(response => {
+				responseElement.textContent = JSON.stringify(response, null, 2);
+				// 更新页面数据
+				if (response.code === 200) {
+					const data = response.data;
+					document.getElementById('total-archives').textContent = data.archivedCount.toLocaleString();
+					document.getElementById('total-borrows').textContent = data.borrowCount.toLocaleString();
+					document.getElementById('pending-returns').textContent = data.pendingCount.toLocaleString();
+				}
+			});
+		}
+
+		function callGetDailyStatistics() {
+			const responseElement = document.getElementById('daily-response');
+			responseElement.style.display = 'block';
+			responseElement.textContent = "调用中...";
+
+			api.getDailyStatistics(new Date()).then(response => {
+				responseElement.textContent = JSON.stringify(response, null, 2);
+			});
+		}
+
+		// 初始化图表
+		function initCharts() {
+			// 借阅趋势图
+			const borrowCtx = document.getElementById('borrow-trend-chart').getContext('2d');
+			new Chart(borrowCtx, {
+				type: 'line',
+				data: {
+					labels: ['10/9', '10/10', '10/11', '10/12', '10/13', '10/14', '10/15'],
+					datasets: [{
+						label: '借阅数量',
+						data: [85, 92, 78, 105, 88, 96, 120],
+						borderColor: '#1a73e8',
+						backgroundColor: 'rgba(26, 115, 232, 0.1)',
+						tension: 0.3,
+						fill: true
+					}, {
+						label: '归还数量',
+						data: [72, 85, 80, 92, 76, 88, 95],
+						borderColor: '#10b981',
+						backgroundColor: 'rgba(16, 185, 129, 0.1)',
+						tension: 0.3,
+						fill: true
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							position: 'top',
+						}
+					},
+					scales: {
+						y: {
+							beginAtZero: true,
+							grid: {
+								color: 'rgba(0, 0, 0, 0.05)'
+							}
+						},
+						x: {
+							grid: {
+								display: false
+							}
+						}
+					}
+				}
+			});
+
+			// 档案类型分布
+			const typeCtx = document.getElementById('type-distribution-chart').getContext('2d');
+			new Chart(typeCtx, {
+				type: 'doughnut',
+				data: {
+					labels: ['电子档案', '纸质档案', '声像档案', '其他档案'],
+					datasets: [{
+						data: [45, 30, 15, 10],
+						backgroundColor: [
+							'#1a73e8',
+							'#10b981',
+							'#f59e0b',
+							'#8b5cf6'
+						]
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							position: 'right',
+						}
+					}
+				}
+			});
+
+			// 档案状态分析
+			const statusCtx = document.getElementById('status-chart').getContext('2d');
+			new Chart(statusCtx, {
+				type: 'bar',
+				data: {
+					labels: ['在库', '借出', '待审核', '待归档', '已过期'],
+					datasets: [{
+						label: '档案数量',
+						data: [8560, 3240, 420, 364, 125],
+						backgroundColor: [
+							'#1a73e8',
+							'#10b981',
+							'#f59e0b',
+							'#8b5cf6',
+							'#ef4444'
+						]
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							display: false
+						}
+					},
+					scales: {
+						y: {
+							beginAtZero: true,
+							grid: {
+								color: 'rgba(0, 0, 0, 0.05)'
+							}
+						},
+						x: {
+							grid: {
+								display: false
+							}
+						}
+					}
+				}
+			});
+		}
+
+		// 更新日期时间
+		function updateDateTime() {
+			const now = new Date();
+			const dateStr = now.toLocaleDateString('zh-CN', {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+				weekday: 'long'
+			});
+
+			const timeStr = now.toLocaleTimeString('zh-CN', {
+				hour: '2-digit',
+				minute: '2-digit',
+				second: '2-digit'
+			});
+
+			document.getElementById('current-date').textContent = dateStr;
+			document.getElementById('current-time').textContent = timeStr;
+		}
+
+		// 页面加载完成后初始化
+		window.onload = function () {
+			// 初始化图表
+			initCharts();
+
+			// 初始化日期时间
+			updateDateTime();
+			setInterval(updateDateTime, 1000);
+
+			// 模拟从API获取最新统计数据
+			setTimeout(() => {
+				callGetLatestStatistics();
+			}, 1500);
+		};
+	</script>
+</body>
+
+</html>

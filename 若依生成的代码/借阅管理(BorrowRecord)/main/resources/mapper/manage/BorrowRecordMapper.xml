@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.BorrowRecordMapper">
+    
+    <resultMap type="BorrowRecord" id="BorrowRecordResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="archiveId"    column="archive_id"    />
+        <result property="applyTime"    column="apply_time"    />
+        <result property="startDate"    column="start_date"    />
+        <result property="endDate"    column="end_date"    />
+        <result property="purpose"    column="purpose"    />
+        <result property="status"    column="status"    />
+        <result property="borrowDate"    column="borrow_date"    />
+        <result property="returnDate"    column="return_date"    />
+        <result property="overdueDays"    column="overdue_days"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectBorrowRecordVo">
+        select id, user_id, user_name, archive_id, apply_time, start_date, end_date, purpose, status, borrow_date, return_date, overdue_days, create_time, create_by, update_time, update_by, remark from tb_borrow_record
+    </sql>
+
+    <select id="selectBorrowRecordList" parameterType="BorrowRecord" resultMap="BorrowRecordResult">
+        <include refid="selectBorrowRecordVo"/>
+        <where>  
+            <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
+            <if test="applyTime != null "> and apply_time = #{applyTime}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="borrowDate != null "> and borrow_date = #{borrowDate}</if>
+            <if test="returnDate != null "> and return_date = #{returnDate}</if>
+        </where>
+    </select>
+    
+    <select id="selectBorrowRecordById" parameterType="Long" resultMap="BorrowRecordResult">
+        <include refid="selectBorrowRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertBorrowRecord" parameterType="BorrowRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_borrow_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="userName != null and userName != ''">user_name,</if>
+            <if test="archiveId != null">archive_id,</if>
+            <if test="applyTime != null">apply_time,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="endDate != null">end_date,</if>
+            <if test="purpose != null">purpose,</if>
+            <if test="status != null">status,</if>
+            <if test="borrowDate != null">borrow_date,</if>
+            <if test="returnDate != null">return_date,</if>
+            <if test="overdueDays != null">overdue_days,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="userName != null and userName != ''">#{userName},</if>
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="applyTime != null">#{applyTime},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="endDate != null">#{endDate},</if>
+            <if test="purpose != null">#{purpose},</if>
+            <if test="status != null">#{status},</if>
+            <if test="borrowDate != null">#{borrowDate},</if>
+            <if test="returnDate != null">#{returnDate},</if>
+            <if test="overdueDays != null">#{overdueDays},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBorrowRecord" parameterType="BorrowRecord">
+        update tb_borrow_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="userName != null and userName != ''">user_name = #{userName},</if>
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="applyTime != null">apply_time = #{applyTime},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="purpose != null">purpose = #{purpose},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="borrowDate != null">borrow_date = #{borrowDate},</if>
+            <if test="returnDate != null">return_date = #{returnDate},</if>
+            <if test="overdueDays != null">overdue_days = #{overdueDays},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBorrowRecordById" parameterType="Long">
+        delete from tb_borrow_record where id = #{id}
+    </delete>
+
+    <delete id="deleteBorrowRecordByIds" parameterType="String">
+        delete from tb_borrow_record where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

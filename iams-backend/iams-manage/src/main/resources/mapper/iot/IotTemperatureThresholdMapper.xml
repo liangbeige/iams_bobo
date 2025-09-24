@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.iot.IotTemperatureThresholdMapper">
+
+    <resultMap type="IotTemperatureThreshold" id="IotTemperatureThresholdResult">
+        <result property="id"    column="id"    />
+        <result property="warehouseName"    column="warehouse_name"    />
+        <result property="location"    column="location"    />
+        <result property="thresholdMin"    column="threshold_min"    />
+        <result property="thresholdMax"    column="threshold_max"    />
+    </resultMap>
+
+    <sql id="selectIotTemperatureThresholdVo">
+        select id, warehouse_name, location, threshold_min, threshold_max from iot_temperature_threshold
+    </sql>
+
+    <select id="selectIotTemperatureThresholdList" parameterType="IotTemperatureThreshold" resultMap="IotTemperatureThresholdResult">
+        <include refid="selectIotTemperatureThresholdVo"/>
+        <where>
+            <if test="warehouseName != null  and warehouseName != ''"> and warehouse_name like concat('%', #{warehouseName}, '%')</if>
+            <if test="location != null  and location != ''"> and location like concat('%', #{location}, '%')</if>
+            <if test="thresholdMin != null "> and threshold_min = #{thresholdMin}</if>
+            <if test="thresholdMax != null "> and threshold_max = #{thresholdMax}</if>
+        </where>
+    </select>
+
+    <select id="selectIotTemperatureThresholdById" parameterType="Long" resultMap="IotTemperatureThresholdResult">
+        <include refid="selectIotTemperatureThresholdVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertIotTemperatureThreshold" parameterType="IotTemperatureThreshold" useGeneratedKeys="true" keyProperty="id">
+        insert into iot_temperature_threshold
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="warehouseName != null">warehouse_name,</if>
+            <if test="location != null">location,</if>
+            <if test="thresholdMin != null">threshold_min,</if>
+            <if test="thresholdMax != null">threshold_max,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="warehouseName != null">#{warehouseName},</if>
+            <if test="location != null">#{location},</if>
+            <if test="thresholdMin != null">#{thresholdMin},</if>
+            <if test="thresholdMax != null">#{thresholdMax},</if>
+         </trim>
+    </insert>
+
+    <update id="updateIotTemperatureThreshold" parameterType="IotTemperatureThreshold">
+        update iot_temperature_threshold
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="warehouseName != null">warehouse_name = #{warehouseName},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="thresholdMin != null">threshold_min = #{thresholdMin},</if>
+            <if test="thresholdMax != null">threshold_max = #{thresholdMax},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteIotTemperatureThresholdById" parameterType="Long">
+        delete from iot_temperature_threshold where id = #{id}
+    </delete>
+
+    <delete id="deleteIotTemperatureThresholdByIds" parameterType="String">
+        delete from iot_temperature_threshold where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

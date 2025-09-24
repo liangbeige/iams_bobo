@@ -1,0 +1,7 @@
+FROM arm64v8/openjdk:17.0-jdk-oraclelinux8
+
+WORKDIR /app
+COPY /iams-admin/target/iams-admin.jar /app/iams-admin.jar
+
+ENTRYPOINT ["java","-jar","/app/iams-admin.jar"]
+EXPOSE 8080

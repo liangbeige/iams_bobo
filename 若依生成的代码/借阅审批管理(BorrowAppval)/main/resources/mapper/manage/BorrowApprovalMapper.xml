@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.BorrowApprovalMapper">
+    
+    <resultMap type="BorrowApproval" id="BorrowApprovalResult">
+        <result property="id"    column="id"    />
+        <result property="applyId"    column="apply_id"    />
+        <result property="approverId"    column="approver_id"    />
+        <result property="approverName"    column="approver_name"    />
+        <result property="approvalTime"    column="approval_time"    />
+        <result property="approvalComment"    column="approval_comment"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectBorrowApprovalVo">
+        select id, apply_id, approver_id, approver_name, approval_time, approval_comment, create_time, create_by, update_time, update_by, remark from tb_borrow_approval
+    </sql>
+
+    <select id="selectBorrowApprovalList" parameterType="BorrowApproval" resultMap="BorrowApprovalResult">
+        <include refid="selectBorrowApprovalVo"/>
+        <where>  
+            <if test="applyId != null "> and apply_id = #{applyId}</if>
+            <if test="approverId != null "> and approver_id = #{approverId}</if>
+            <if test="approverName != null  and approverName != ''"> and approver_name like concat('%', #{approverName}, '%')</if>
+            <if test="approvalTime != null "> and approval_time = #{approvalTime}</if>
+            <if test="approvalComment != null  and approvalComment != ''"> and approval_comment = #{approvalComment}</if>
+        </where>
+    </select>
+    
+    <select id="selectBorrowApprovalById" parameterType="Long" resultMap="BorrowApprovalResult">
+        <include refid="selectBorrowApprovalVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertBorrowApproval" parameterType="BorrowApproval" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_borrow_approval
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="applyId != null">apply_id,</if>
+            <if test="approverId != null">approver_id,</if>
+            <if test="approverName != null">approver_name,</if>
+            <if test="approvalTime != null">approval_time,</if>
+            <if test="approvalComment != null">approval_comment,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="applyId != null">#{applyId},</if>
+            <if test="approverId != null">#{approverId},</if>
+            <if test="approverName != null">#{approverName},</if>
+            <if test="approvalTime != null">#{approvalTime},</if>
+            <if test="approvalComment != null">#{approvalComment},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateBorrowApproval" parameterType="BorrowApproval">
+        update tb_borrow_approval
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="applyId != null">apply_id = #{applyId},</if>
+            <if test="approverId != null">approver_id = #{approverId},</if>
+            <if test="approverName != null">approver_name = #{approverName},</if>
+            <if test="approvalTime != null">approval_time = #{approvalTime},</if>
+            <if test="approvalComment != null">approval_comment = #{approvalComment},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteBorrowApprovalById" parameterType="Long">
+        delete from tb_borrow_approval where id = #{id}
+    </delete>
+
+    <delete id="deleteBorrowApprovalByIds" parameterType="String">
+        delete from tb_borrow_approval where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

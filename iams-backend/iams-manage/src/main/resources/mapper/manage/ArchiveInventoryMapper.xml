@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.ArchiveInventoryMapper">
+
+    <resultMap type="ArchiveInventory" id="ArchiveInventoryResult">
+        <result property="id"    column="id"    />
+        <result property="inventoryTime"    column="inventory_time"    />
+        <result property="totalCount"    column="total_count"    />
+        <result property="scannedCount"    column="scanned_count"    />
+        <result property="inventoryRate"    column="inventory_rate"    />
+        <result property="operator"    column="operator"    />
+        <result property="remark"    column="remark"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectArchiveInventoryVo">
+        select id, inventory_time, total_count, scanned_count, inventory_rate,
+               operator, remark, create_by, create_time, update_by, update_time
+        from tb_archive_inventory
+    </sql>
+
+    <select id="selectArchiveInventoryList" parameterType="ArchiveInventory" resultMap="ArchiveInventoryResult">
+        <include refid="selectArchiveInventoryVo"/>
+        <where>
+            <if test="inventoryTime != null "> and inventory_time = #{inventoryTime}</if>
+            <if test="totalCount != null "> and total_count = #{totalCount}</if>
+            <if test="scannedCount != null "> and scanned_count = #{scannedCount}</if>
+            <if test="operator != null  and operator != ''"> and operator like concat('%', #{operator}, '%')</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectArchiveInventoryById" parameterType="Long" resultMap="ArchiveInventoryResult">
+        <include refid="selectArchiveInventoryVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertArchiveInventory" parameterType="ArchiveInventory" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_archive_inventory
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="inventoryTime != null">inventory_time,</if>
+            <if test="totalCount != null">total_count,</if>
+            <if test="scannedCount != null">scanned_count,</if>
+            <if test="inventoryRate != null">inventory_rate,</if>
+            <if test="operator != null">operator,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="inventoryTime != null">#{inventoryTime},</if>
+            <if test="totalCount != null">#{totalCount},</if>
+            <if test="scannedCount != null">#{scannedCount},</if>
+            <if test="inventoryRate != null">#{inventoryRate},</if>
+            <if test="operator != null">#{operator},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateArchiveInventory" parameterType="ArchiveInventory">
+        update tb_archive_inventory
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="inventoryTime != null">inventory_time = #{inventoryTime},</if>
+            <if test="totalCount != null">total_count = #{totalCount},</if>
+            <if test="scannedCount != null">scanned_count = #{scannedCount},</if>
+            <if test="inventoryRate != null">inventory_rate = #{inventoryRate},</if>
+            <if test="operator != null">operator = #{operator},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveInventoryById" parameterType="Long">
+        delete from tb_archive_inventory where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveInventoryByIds" parameterType="String">
+        delete from tb_archive_inventory where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

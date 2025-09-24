@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.iot.IotWarehouseMapper">
+
+    <resultMap type="IotWarehouse" id="IotWarehouseResult">
+        <result property="warehouseId"    column="warehouse_id"    />
+        <result property="warehouseName"    column="warehouse_name"    />
+        <result property="location"    column="location"    />
+        <result property="capacity"    column="capacity"    />
+        <result property="temperature"    column="temperature"    />
+        <result property="humidity"    column="humidity"    />
+        <result property="oxygenLevel"    column="oxygen_level"    />
+        <result property="nitrogenLevel"    column="nitrogen_level"    />
+        <result property="isFire"    column="is_fire"    />
+        <result property="lastUpdated"    column="last_updated"    />
+    </resultMap>
+
+    <sql id="selectIotWarehouseVo">
+        select warehouse_id, warehouse_name, location, capacity, temperature, humidity, oxygen_level, nitrogen_level, is_fire, last_updated from iot_warehouse
+    </sql>
+
+    <select id="selectIotWarehouseList" parameterType="IotWarehouse" resultMap="IotWarehouseResult">
+        <include refid="selectIotWarehouseVo"/>
+        <where>
+            <if test="warehouseName != null  and warehouseName != ''"> and warehouse_name like concat('%', #{warehouseName}, '%')</if>
+            <if test="location != null  and location != ''"> and location like concat('%', #{location}, '%')</if>
+            <if test="capacity != null "> and capacity = #{capacity}</if>
+            <if test="temperature != null "> and temperature = #{temperature}</if>
+            <if test="humidity != null "> and humidity = #{humidity}</if>
+            <if test="oxygenLevel != null "> and oxygen_level = #{oxygenLevel}</if>
+            <if test="nitrogenLevel != null "> and nitrogen_level = #{nitrogenLevel}</if>
+            <if test="isFire != null "> and is_fire = #{isFire}</if>
+            <if test="lastUpdated != null "> and last_updated = #{lastUpdated}</if>
+        </where>
+    </select>
+
+    <select id="selectIotWarehouseByWarehouseId" parameterType="Long" resultMap="IotWarehouseResult">
+        <include refid="selectIotWarehouseVo"/>
+        where warehouse_id = #{warehouseId}
+    </select>
+
+    <insert id="insertIotWarehouse" parameterType="IotWarehouse" useGeneratedKeys="true" keyProperty="warehouseId">
+        insert into iot_warehouse
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="warehouseName != null and warehouseName != ''">warehouse_name,</if>
+            <if test="location != null and location != ''">location,</if>
+            <if test="capacity != null">capacity,</if>
+            <if test="temperature != null">temperature,</if>
+            <if test="humidity != null">humidity,</if>
+            <if test="oxygenLevel != null">oxygen_level,</if>
+            <if test="nitrogenLevel != null">nitrogen_level,</if>
+            <if test="isFire != null">is_fire,</if>
+            <if test="lastUpdated != null">last_updated,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="warehouseName != null and warehouseName != ''">#{warehouseName},</if>
+            <if test="location != null and location != ''">#{location},</if>
+            <if test="capacity != null">#{capacity},</if>
+            <if test="temperature != null">#{temperature},</if>
+            <if test="humidity != null">#{humidity},</if>
+            <if test="oxygenLevel != null">#{oxygenLevel},</if>
+            <if test="nitrogenLevel != null">#{nitrogenLevel},</if>
+            <if test="isFire != null">#{isFire},</if>
+            <if test="lastUpdated != null">#{lastUpdated},</if>
+         </trim>
+    </insert>
+
+    <update id="updateIotWarehouse" parameterType="IotWarehouse">
+        update iot_warehouse
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="warehouseName != null and warehouseName != ''">warehouse_name = #{warehouseName},</if>
+            <if test="location != null and location != ''">location = #{location},</if>
+            <if test="capacity != null">capacity = #{capacity},</if>
+            <if test="temperature != null">temperature = #{temperature},</if>
+            <if test="humidity != null">humidity = #{humidity},</if>
+            <if test="oxygenLevel != null">oxygen_level = #{oxygenLevel},</if>
+            <if test="nitrogenLevel != null">nitrogen_level = #{nitrogenLevel},</if>
+            <if test="isFire != null">is_fire = #{isFire},</if>
+            <if test="lastUpdated != null">last_updated = #{lastUpdated},</if>
+        </trim>
+        where warehouse_id = #{warehouseId}
+    </update>
+
+    <delete id="deleteIotWarehouseByWarehouseId" parameterType="Long">
+        delete from iot_warehouse where warehouse_id = #{warehouseId}
+    </delete>
+
+    <delete id="deleteIotWarehouseByWarehouseIds" parameterType="String">
+        delete from iot_warehouse where warehouse_id in
+        <foreach item="warehouseId" collection="array" open="(" separator="," close=")">
+            #{warehouseId}
+        </foreach>
+    </delete>
+</mapper>

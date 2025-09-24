@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.ArchiveLogMapper">
+    
+    <resultMap type="ArchiveLog" id="ArchiveLogResult">
+        <result property="id"    column="id"    />
+        <result property="archiveId"    column="archive_id"    />
+        <result property="taskType"    column="task_type"    />
+        <result property="initiator"    column="initiator"    />
+        <result property="handler"    column="handler"    />
+        <result property="startDate"    column="start_date"    />
+        <result property="endDate"    column="end_date"    />
+        <result property="taskStatus"    column="task_status"    />
+        <result property="remark"    column="remark"    />
+        <!-- 关键：添加 borrowRemark 映射 -->
+        <result property="borrowRemark" column="borrow_remark" />
+    </resultMap>
+
+    <sql id="selectArchiveLogVo">
+        select id, archive_id, task_type, initiator, handler, start_date, end_date, task_status, remark from tb_archive_log
+    </sql>
+
+    <select id="selectArchiveLogList" parameterType="ArchiveLog" resultMap="ArchiveLogResult">
+        <include refid="selectArchiveLogVo"/>
+        <where>  
+            <if test="archiveId != null "> and archive_id = #{archiveId}</if>
+            <if test="taskType != null  and taskType != ''"> and task_type = #{taskType}</if>
+            <if test="initiator != null  and initiator != ''"> and initiator = #{initiator}</if>
+            <if test="handler != null  and handler != ''"> and handler = #{handler}</if>
+            <if test="startDate != null "> and start_date = #{startDate}</if>
+            <if test="endDate != null "> and end_date = #{endDate}</if>
+            <if test="taskStatus != null  and taskStatus != ''"> and task_status = #{taskStatus}</if>
+        </where>
+        ORDER BY id DESC
+    </select>
+    
+    <select id="selectArchiveLogById" parameterType="Long" resultMap="ArchiveLogResult">
+        <include refid="selectArchiveLogVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertArchiveLog" parameterType="ArchiveLog" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_archive_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">archive_id,</if>
+            <if test="taskType != null">task_type,</if>
+            <if test="initiator != null">initiator,</if>
+            <if test="handler != null">handler,</if>
+            <if test="startDate != null">start_date,</if>
+            <if test="endDate != null">end_date,</if>
+            <if test="taskStatus != null">task_status,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="taskType != null">#{taskType},</if>
+            <if test="initiator != null">#{initiator},</if>
+            <if test="handler != null">#{handler},</if>
+            <if test="startDate != null">#{startDate},</if>
+            <if test="endDate != null">#{endDate},</if>
+            <if test="taskStatus != null">#{taskStatus},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateArchiveLog" parameterType="ArchiveLog">
+        update tb_archive_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="taskType != null">task_type = #{taskType},</if>
+            <if test="initiator != null">initiator = #{initiator},</if>
+            <if test="handler != null">handler = #{handler},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="taskStatus != null">task_status = #{taskStatus},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveLogById" parameterType="Long">
+        delete from tb_archive_log where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveLogByIds" parameterType="String">
+        delete from tb_archive_log where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectOpLogs" resultMap="ArchiveLogResult" parameterType="Long">
+        <include refid="selectArchiveLogVo"/>
+        WHERE (task_type = '入库' OR task_type = '出库' OR task_type = '上架' OR task_type = '下架')
+        AND archive_id = #{archiveId}
+        ORDER BY start_date DESC
+    </select>
+
+    <select id="selectBorrowLogs" resultMap="ArchiveLogResult" parameterType="Long">
+        SELECT
+        al.id,
+        al.archive_id,
+        al.task_type,
+        al.initiator,
+        al.handler,
+        al.start_date,
+        al.end_date,
+        al.task_status,
+        al.remark,
+        COALESCE(br.remark, '') AS borrow_remark  <!-- 确保使用别名 -->
+        FROM tb_archive_log al
+        LEFT JOIN tb_borrow_record br
+        ON al.archive_id = br.archive_id
+        AND (
+        br.start_apply_time BETWEEN al.start_date - INTERVAL '1 minute' AND al.start_date + INTERVAL '1 minute'
+        )
+        WHERE (al.task_type = '档案借阅' OR al.task_type = '档案归还')
+        AND al.archive_id = #{archiveId}
+        ORDER BY al.start_date DESC
+    </select>
+</mapper>

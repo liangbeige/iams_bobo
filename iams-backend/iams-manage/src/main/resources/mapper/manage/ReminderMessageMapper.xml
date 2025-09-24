@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.ReminderMessageMapper">
+
+    <resultMap type="ReminderMessage" id="ReminderMessageResult">
+        <result property="id"                    column="id"                    />
+        <result property="userId"                column="user_id"               />
+        <result property="title"                 column="title"                 />
+        <result property="content"               column="content"               />
+        <result property="taskId"                column="task_id"               />
+        <result property="processInstanceId"     column="instance_id"           />
+        <result property="businessKey"           column="business_key"          />
+        <result property="isRead"                column="is_read"               />
+        <result property="messageType"           column="message_type"          />
+        <result property="createTime"            column="create_time"           />
+        <result property="readTime"              column="read_time"             />
+    </resultMap>
+
+    <sql id="selectReminderMessageVo">
+        select id, user_id, title, content, task_id, instance_id, business_key, is_read, message_type, create_time, read_time from sys_reminder_message
+    </sql>
+
+    <select id="selectReminderMessageList" parameterType="ReminderMessage" resultMap="ReminderMessageResult">
+        <include refid="selectReminderMessageVo"/>
+        <where>
+            <if test="userId != null">and user_id = #{userId}</if>
+            <if test="title != null and title != ''">and title like '%' || #{title} || '%'</if>
+            <if test="content != null and content != ''">and content like '%' || #{content} || '%'</if>
+            <if test="taskId != null and taskId != ''">and task_id = #{taskId}</if>
+            <if test="processInstanceId != null and processInstanceId != ''">and instance_id = #{processInstanceId}</if>
+            <if test="businessKey != null and businessKey != ''">and business_key = #{businessKey}</if>
+            <if test="isRead != null">and is_read = #{isRead}</if>
+            <if test="messageType != null and messageType != ''">and message_type = #{messageType}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectReminderMessageById" parameterType="Long" resultMap="ReminderMessageResult">
+        <include refid="selectReminderMessageVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectUnreadMessagesByUserId" parameterType="Long" resultMap="ReminderMessageResult">
+        <include refid="selectReminderMessageVo"/>
+        where user_id = #{userId} and is_read = false
+        order by create_time desc
+    </select>
+
+    <select id="countUnreadMessagesByUserId" parameterType="Long" resultType="Long">
+        select count(*) from sys_reminder_message
+        where user_id = #{userId} and is_read = false
+    </select>
+
+    <insert id="insertReminderMessage" parameterType="ReminderMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_reminder_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="content != null and content != ''">content,</if>
+            <if test="taskId != null">task_id,</if>
+            <if test="processInstanceId != null">instance_id,</if>
+            <if test="businessKey != null">business_key,</if>
+            <if test="isRead != null">is_read,</if>
+            <if test="messageType != null">message_type,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="readTime != null">read_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="content != null and content != ''">#{content},</if>
+            <if test="taskId != null">#{taskId},</if>
+            <if test="processInstanceId != null">#{processInstanceId},</if>
+            <if test="businessKey != null">#{businessKey},</if>
+            <if test="isRead != null">#{isRead},</if>
+            <if test="messageType != null">#{messageType},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="readTime != null">#{readTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateReminderMessage" parameterType="ReminderMessage">
+        update sys_reminder_message
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="taskId != null">task_id = #{taskId},</if>
+            <if test="processInstanceId != null">instance_id = #{processInstanceId},</if>
+            <if test="businessKey != null">business_key = #{businessKey},</if>
+            <if test="isRead != null">is_read = #{isRead},</if>
+            <if test="messageType != null">message_type = #{messageType},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="readTime != null">read_time = #{readTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="markMessageAsRead" parameterType="Long">
+        update sys_reminder_message
+        set is_read = true, read_time = now()
+        where id = #{id}
+    </update>
+
+    <delete id="deleteReminderMessageById" parameterType="Long">
+        delete from sys_reminder_message where id = #{id}
+    </delete>
+
+    <delete id="deleteReminderMessageByIds">
+        delete from sys_reminder_message where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

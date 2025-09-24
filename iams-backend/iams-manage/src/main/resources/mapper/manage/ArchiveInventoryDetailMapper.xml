@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iams.manage.mapper.ArchiveInventoryDetailMapper">
+
+    <resultMap type="ArchiveInventoryDetail" id="ArchiveInventoryDetailResult">
+        <result property="id"    column="id"    />
+        <result property="inventoryId"    column="inventory_id"    />
+        <result property="archiveId"    column="archive_id"    />
+        <result property="rfid"    column="rfid"    />
+        <result property="danghao"    column="danghao"    />
+        <result property="scanTime"    column="scan_time"    />
+        <result property="antenna"    column="antenna"    />
+        <result property="rssi"    column="rssi"    />
+        <result property="shitiLocation"    column="shiti_location"    />
+        <result property="exactLocation"    column="exact_location"    />
+        <result property="manual"    column="manual"    />
+    </resultMap>
+
+    <sql id="selectArchiveInventoryDetailVo">
+        select id, inventory_id, archive_id, rfid, danghao, scan_time,
+               antenna, rssi, shiti_location, exact_location, manual
+        from tb_archive_inventory_detail
+    </sql>
+
+    <select id="selectArchiveInventoryDetailList" parameterType="ArchiveInventoryDetail" resultMap="ArchiveInventoryDetailResult">
+        <include refid="selectArchiveInventoryDetailVo"/>
+        <where>
+            <if test="inventoryId != null "> and inventory_id = #{inventoryId}</if>
+            <if test="archiveId != null "> and archive_id = #{archiveId}</if>
+            <if test="rfid != null  and rfid != ''"> and rfid = #{rfid}</if>
+            <if test="danghao != null  and danghao != ''"> and danghao like concat('%', #{danghao}, '%')</if>
+            <if test="shitiLocation != null  and shitiLocation != ''"> and shiti_location like concat('%', #{shitiLocation}, '%')</if>
+            <if test="manual != null "> and manual = #{manual}</if>
+        </where>
+        order by scan_time desc
+    </select>
+
+    <select id="selectArchiveInventoryDetailById" parameterType="Long" resultMap="ArchiveInventoryDetailResult">
+        <include refid="selectArchiveInventoryDetailVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectDetailsByInventoryId" parameterType="Long" resultMap="ArchiveInventoryDetailResult">
+        <include refid="selectArchiveInventoryDetailVo"/>
+        where inventory_id = #{inventoryId}
+        order by scan_time desc
+    </select>
+
+    <!-- 根据盘点ID和RFID查询明细 -->
+    <select id="selectDetailByInventoryIdAndRfid" resultMap="ArchiveInventoryDetailResult">
+        <include refid="selectArchiveInventoryDetailVo"/>
+        where inventory_id = #{inventoryId} and rfid = #{rfid}
+        limit 1
+    </select>
+
+    <!-- 批量插入盘点明细 -->
+    <insert id="batchInsertDetails" parameterType="java.util.List">
+        insert into tb_archive_inventory_detail (
+        inventory_id, archive_id, rfid, danghao, scan_time,
+        antenna, rssi, shiti_location, exact_location, manual
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.inventoryId}, #{item.archiveId}, #{item.rfid},
+            #{item.danghao}, #{item.scanTime}, #{item.antenna},
+            #{item.rssi}, #{item.shitiLocation}, #{item.exactLocation},
+            #{item.manual})
+        </foreach>
+    </insert>
+
+    <insert id="insertArchiveInventoryDetail" parameterType="ArchiveInventoryDetail" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_archive_inventory_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="inventoryId != null">inventory_id,</if>
+            <if test="archiveId != null">archive_id,</if>
+            <if test="rfid != null">rfid,</if>
+            <if test="danghao != null">danghao,</if>
+            <if test="scanTime != null">scan_time,</if>
+            <if test="antenna != null">antenna,</if>
+            <if test="rssi != null">rssi,</if>
+            <if test="shitiLocation != null">shiti_location,</if>
+            <if test="exactLocation != null">exact_location,</if>
+            <if test="manual != null">manual,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="inventoryId != null">#{inventoryId},</if>
+            <if test="archiveId != null">#{archiveId},</if>
+            <if test="rfid != null">#{rfid},</if>
+            <if test="danghao != null">#{danghao},</if>
+            <if test="scanTime != null">#{scanTime},</if>
+            <if test="antenna != null">#{antenna},</if>
+            <if test="rssi != null">#{rssi},</if>
+            <if test="shitiLocation != null">#{shitiLocation},</if>
+            <if test="exactLocation != null">#{exactLocation},</if>
+            <if test="manual != null">#{manual},</if>
+        </trim>
+    </insert>
+
+    <update id="updateArchiveInventoryDetail" parameterType="ArchiveInventoryDetail">
+        update tb_archive_inventory_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="inventoryId != null">inventory_id = #{inventoryId},</if>
+            <if test="archiveId != null">archive_id = #{archiveId},</if>
+            <if test="rfid != null">rfid = #{rfid},</if>
+            <if test="danghao != null">danghao = #{danghao},</if>
+            <if test="scanTime != null">scan_time = #{scanTime},</if>
+            <if test="antenna != null">antenna = #{antenna},</if>
+            <if test="rssi != null">rssi = #{rssi},</if>
+            <if test="shitiLocation != null">shiti_location = #{shitiLocation},</if>
+            <if test="exactLocation != null">exact_location = #{exactLocation},</if>
+            <if test="manual != null">manual = #{manual},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteArchiveInventoryDetailById" parameterType="Long">
+        delete from tb_archive_inventory_detail where id = #{id}
+    </delete>
+
+    <delete id="deleteArchiveInventoryDetailByIds" parameterType="String">
+        delete from tb_archive_inventory_detail where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteDetailsByInventoryId" parameterType="Long">
+        delete from tb_archive_inventory_detail where inventory_id = #{inventoryId}
+    </delete>
+
+    <!-- 统计查询 -->
+    <select id="countDetailsByInventoryId" parameterType="Long" resultType="int">
+        select count(*) from tb_archive_inventory_detail where inventory_id = #{inventoryId}
+    </select>
+
+    <select id="countManualDetailsByInventoryId" parameterType="Long" resultType="int">
+        select count(*) from tb_archive_inventory_detail
+        where inventory_id = #{inventoryId} and manual = 1
+    </select>
+
+    <select id="countAutoDetailsByInventoryId" parameterType="Long" resultType="int">
+        select count(*) from tb_archive_inventory_detail
+        where inventory_id = #{inventoryId} and manual = 0
+    </select>
+
+    <!-- 查询不同位置的数量 -->
+    <select id="countLocationsByInventoryId" parameterType="Long" resultType="int">
+        select count(distinct shiti_location) from tb_archive_inventory_detail
+        where inventory_id = #{inventoryId} and shiti_location is not null
+    </select>
+
+</mapper>
