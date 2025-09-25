@@ -48,6 +48,17 @@ import com.iams.common.config.RuoYiConfig; // 假设您有用于上传路径的�
 import com.iams.common.utils.StringUtils;
 
 
+import com.iams.common.config.RuoYiConfig;
+import com.iams.common.constant.Constants;
+import com.iams.common.utils.file.FileUploadUtils;
+import com.iams.common.utils.file.FileUtils;
+import com.iams.manage.domain.Archive;
+import com.iams.manage.mapper.ArchiveMapper;
+import com.iams.manage.service.IArchiveService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 
 //import static org.elasticsearch.rest.ChunkedRestResponseBodyPart.logger;
 import org.slf4j.Logger;
@@ -115,46 +126,37 @@ public class ArchiveServiceImpl implements IArchiveService {
     private ArchiveCategoryMapper archiveCategoryMapper;
 
     /**
-     * 注意: 此实现假设使用本地文件存储。
-     * 如果您正在使用像 MinIO 这样的云服务，请将文件保存逻辑
-     * 替换为您的 MinIO 客户端上传逻辑。
+     * 上传档案销毁佐证材料
+     *
+     * @param archiveId 档案ID
+     * @param file      上传的文件
+     * @return 文件访问URL
+     * @throws Exception
      */
     @Override
-    @Transactional
     public String uploadDestructionCertificate(Long archiveId, MultipartFile file) throws Exception {
-        if (file.isEmpty()) {
-            throw new Exception("上传的文件不能为空");
-        }
-
-        // 1. 检查档案是否存在
+        // 1. 校验档案是否存在
         Archive archive = archiveMapper.selectArchiveById(archiveId);
         if (archive == null) {
-            throw new Exception("档案不存在，ID: " + archiveId);
+            throw new RuntimeException("档案不存在");
         }
 
-        // 2. 将文件上传到您的存储位置 (本地或像 MinIO 这样的云端)
-        // 本地存储示例:
-        String uploadPath = RuoYiConfig.getProfile() + "/destruction_certs";
-        String fileName = FileUploadUtils.upload(uploadPath, file); // 您的工具类方法，用于保存文件并返回唯一文件名
-        String fileUrl = "/profile/destruction_certs/" + fileName; // 访问文件的URL
+        // 2. [MODIFIED] 使用若依框架的工具类来处理文件上传
+        //    它会自动处理路径创建、文件名生成等，并返回一个相对路径
+        //    "destruction_certs" 是我们为这类文件指定的子目录
+        String filePath = RuoYiConfig.getUploadPath();
+        String relativePath = FileUploadUtils.upload(filePath + "/destruction_certs", file);
 
-        /*
-         * MinIO 示例 (如果您有一个 MinioClient 工具类):
-         *
-         * String bucketName = "iams-destruction-certs";
-         * String objectName = "archive_" + archiveId + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
-         * minioClient.uploadObject(bucketName, objectName, file.getInputStream(), file.getContentType());
-         * String fileUrl = minioClient.getObjectUrl(bucketName, objectName); // 这将是完整的URL
-         */
+        // 3. 构造可以通过Web访问的URL
+        //    Constants.RESOURCE_PREFIX 是 /profile
+        String fileUrl = Constants.RESOURCE_PREFIX + relativePath;
 
-        // 3. 更新数据库
-        Archive updateArchive = new Archive();
-        updateArchive.setId(archiveId);
-        updateArchive.setHasDestructionCertificate(true);
-        updateArchive.setDestructionCertificateUrl(fileUrl); // 存储相对路径或完整URL
+        // 4. 更新数据库
+        archive.setHasDestructionCertificate(true); // 标记为已有凭证
+        archive.setDestructionCertificateUrl(fileUrl); // 存储Web访问URL
+        archiveMapper.updateArchive(archive);
 
-        archiveMapper.updateArchiveCertificateInfo(updateArchive);
-
+        // 5. 返回文件URL
         return fileUrl;
     }
 

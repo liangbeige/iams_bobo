@@ -70,6 +70,7 @@ public class ArchiveController extends BaseController
     /**
      * 上传档案销毁佐证材料
      */
+    @PreAuthorize("@ss.hasPermi('manage:archive:edit')") // [MODIFIED] 新增权限校验，与前端按钮权限保持一致
     @PostMapping("/uploadDestructionCertificate")
     public AjaxResult uploadDestructionCertificate(@RequestParam("archiveId") Long archiveId,
                                                    @RequestPart("file") MultipartFile file) {
@@ -77,11 +78,20 @@ public class ArchiveController extends BaseController
             return AjaxResult.error("上传文件不能为空");
         }
         try {
+            // [ADDED] 增加日志，方便调试
+            logger.info("开始上传档案销毁佐证材料，档案ID: {}", archiveId);
+
             String fileUrl = archiveService.uploadDestructionCertificate(archiveId, file);
+
+            // [ADDED] 增加成功日志
+            logger.info("档案销毁佐证材料上传成功，档案ID: {}, 文件URL: {}", archiveId, fileUrl);
+
             AjaxResult ajax = AjaxResult.success("上传成功");
             ajax.put("url", fileUrl); // 返回URL，以便前端可能立即使用
             return ajax;
         } catch (Exception e) {
+            // [ADDED] 增加异常日志
+            logger.error("上传档案销毁佐证材料失败，档案ID: {}", archiveId, e);
             return AjaxResult.error("上传失败: " + e.getMessage());
         }
     }
@@ -107,7 +117,7 @@ public class ArchiveController extends BaseController
     }
 
     /**
-     *  获取档案列表列表-全体
+     * 获取档案列表列表-全体
      */
 
     @GetMapping("/list-all")
@@ -172,14 +182,14 @@ public class ArchiveController extends BaseController
                         ));
                 // 🔥 7. 补充状态信息到每个档案
                 list = list.stream().map(archive -> {
-                        // 补充状态信息
-                        Map<String, Object> statusInfo = statusMap.get(archive.getMysqlDanghao());
-                        if (statusInfo != null) {
-                            archive.setStatus((String) statusInfo.get("status"));
-                            archive.setShitiLocation((String) statusInfo.get("shiti_location"));
-                            archive.setExactLocation((String) statusInfo.get("exact_location"));
-                        }
-                        return archive;
+                    // 补充状态信息
+                    Map<String, Object> statusInfo = statusMap.get(archive.getMysqlDanghao());
+                    if (statusInfo != null) {
+                        archive.setStatus((String) statusInfo.get("status"));
+                        archive.setShitiLocation((String) statusInfo.get("shiti_location"));
+                        archive.setExactLocation((String) statusInfo.get("exact_location"));
+                    }
+                    return archive;
                 }).collect(Collectors.toList());
                 System.out.println("状态信息补充完成，数据量: " + list.size());
             }
@@ -256,7 +266,7 @@ public class ArchiveController extends BaseController
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
-            return success(archiveService.selectArchiveById(id));
+        return success(archiveService.selectArchiveById(id));
     }
 
     /**
@@ -264,7 +274,7 @@ public class ArchiveController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manage:archive:query')")
     @GetMapping(value = "/get-by-rfid/{rfid}")
-    public AjaxResult getArchiveByRfid(@PathVariable("rfid") String rfid)
+    public AjaxResult getArchiveByRfid(@PathVariable("id") String rfid)
     {
         return success(archiveService.selectArchiveByRfid(rfid));
     }
@@ -344,19 +354,19 @@ public class ArchiveController extends BaseController
     {
         try {
 
-        // 获取修改前的档案记录
-        Long archiveId = archive.getId();
-        Archive originalArchive = archiveService.selectArchiveById(archiveId);
+            // 获取修改前的档案记录
+            Long archiveId = archive.getId();
+            Archive originalArchive = archiveService.selectArchiveById(archiveId);
 
-        // 更新档案
-        int result = archiveService.updateArchive(archive);
+            // 更新档案
+            int result = archiveService.updateArchive(archive);
 
-        if (result > 0) {
-            // 处理项目变更的统计更新
-            handleProjectStatisticUpdate(originalArchive, archive);
-            return AjaxResult.success();
-        }
-        return AjaxResult.error();
+            if (result > 0) {
+                // 处理项目变更的统计更新
+                handleProjectStatisticUpdate(originalArchive, archive);
+                return AjaxResult.success();
+            }
+            return AjaxResult.error();
 
         } catch (com.iams.common.exception.ServiceException e) {
             // 🔥 捕获业务异常（包括档号重复）- 参考添加时的逻辑
@@ -406,7 +416,7 @@ public class ArchiveController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manage:archive:remove')")
     @Log(title = "档案列表", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
 

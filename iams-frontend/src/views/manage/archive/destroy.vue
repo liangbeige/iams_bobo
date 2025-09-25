@@ -128,36 +128,36 @@
                     <el-button link type="primary" @click="handleDetail(scope.row)" v-hasPermi="['manage:archive:query']">
                         详情
                     </el-button>
-                    <el-button v-if="!scope.row.hasCertificate" link type="primary" icon="Upload"
+                    <el-button v-if="!scope.row.hasDestructionCertificate" link type="primary" icon="Upload"
                                @click="handleUploadCertificate(scope.row)" v-hasPermi="['manage:archive:edit']">
                         上传凭证
                     </el-button>
-                    <el-button v-if="scope.row.hasCertificate" link type="primary" icon="View" @click="viewCertificate(scope.row)"
+                    <el-button v-if="scope.row.hasDestructionCertificate" link type="primary" icon="View" @click="viewCertificate(scope.row)"
                                v-hasPermi="['manage:archive:query']">
                         查看凭证
                     </el-button>
                     <el-button
-                            v-if="scope.row.status === 'Archived' && scope.row.availability === 0"
-                            link
-                            type="danger"
-                            @click="handleDestroy(scope.row)"
-                            v-hasPermi="['manage:archive:destroy']">
+                        v-if="scope.row.status === 'Archived' && scope.row.availability === 0"
+                        link
+                        type="danger"
+                        @click="handleDestroy(scope.row)"
+                        v-hasPermi="['manage:archive:destroy']">
                         提交销毁
                     </el-button>
                     <el-button
-                            v-if="scope.row.status === 'Destroying' && scope.row.availability === 1"
-                            link
-                            type="warning"
-                            @click="handleCancelDestroy(scope.row)"
-                            v-hasPermi="['manage:archive:destroy']">
+                        v-if="scope.row.status === 'Destroying' && scope.row.availability === 1"
+                        link
+                        type="warning"
+                        @click="handleCancelDestroy(scope.row)"
+                        v-hasPermi="['manage:archive:destroy']">
                         撤销销毁
                     </el-button>
                     <el-button
-                            v-if="scope.row.status === 'Destroying' && scope.row.availability === 1 && scope.row.rfid && scope.row.rfid.endsWith('00')"
-                            link
-                            type="danger"
-                            @click="handleCompleteDestroy(scope.row)"
-                            v-hasPermi="['manage:archive:destroy']">
+                        v-if="scope.row.status === 'Destroying' && scope.row.availability === 1 && scope.row.rfid && scope.row.rfid.endsWith('00')"
+                        link
+                        type="danger"
+                        @click="handleCompleteDestroy(scope.row)"
+                        v-hasPermi="['manage:archive:destroy']">
                         确认销毁
                     </el-button>
                 </template>
@@ -167,9 +167,9 @@
         <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum"
                     v-model:limit="queryParams.pageSize" @pagination="getList" />
 
-        <el-dialog title="上传销毁佐证材料" v-model="uploadDialogVisible" width="500px">
-            <el-upload class="upload-demo" drag :action="uploadUrl" :before-upload="beforeUpload"
-                       :on-success="handleUploadSuccess" :show-file-list="false" :headers="headers">
+        <el-dialog title="上传销毁佐证材料" v-model="uploadDialogVisible" width="500px" append-to-body>
+            <el-upload class="upload-demo" drag :action="uploadUrl" :headers="headers" :before-upload="beforeUpload"
+                       :on-success="handleUploadSuccess" :on-error="handleUploadError" :show-file-list="false">
                 <el-icon class="el-icon--upload"><upload-filled /></el-icon>
                 <div class="el-upload__text">拖拽文件到此处或<em>点击上传</em></div>
                 <template #tip>
@@ -178,8 +178,8 @@
             </el-upload>
         </el-dialog>
 
-        <el-dialog title="销毁佐证材料预览" v-model="previewDialogVisible" width="80%" top="5vh">
-            <iframe :src="url" frameborder="0" width="100%" height="600px">
+        <el-dialog title="销毁佐证材料预览" v-model="previewDialogVisible" width="80%" top="5vh" append-to-body>
+            <iframe v-if="url" :src="url" frameborder="0" width="100%" height="600px">
             </iframe>
             <template #footer>
                 <div class="dialog-footer">
@@ -320,7 +320,6 @@
 
 <script setup name="ArchiveDestroy">
 import {
-    // 使用修正后的API
     listAvailableArchives,
     submitDestroyApplication,
     batchSubmitDestroyApplication,
@@ -365,6 +364,7 @@ const multiple = ref(true);
 const total = ref(0);
 const projectList = ref([]);
 const userList = ref([]);
+// [MODIFIED] 认证头信息
 const headers = ref({ Authorization: "Bearer " + getToken() });
 
 // 查询参数
@@ -385,26 +385,27 @@ const queryParams = reactive({
 });
 
 
-// === 【修正部分】佐证材料上传 ===
+// === 佐证材料上传与预览 ===
 const uploadDialogVisible = ref(false);
 const previewDialogVisible = ref(false);
 const url = ref(""); // 用于预览和下载的URL
-const currentArchive = ref(null); // 【修正】变量名从 currentProject 改为 currentArchive，更符合实际用途
+const currentArchive = ref(null); // 用于存储当前操作的档案对象
 
-// 【修正】上传URL指向正确的后端接口，并传递 archiveId
+// 上传URL，动态绑定当前操作的档案ID
 const uploadUrl = computed(() => {
+    // 确保 currentArchive.value 和其 id 属性存在
     const archiveId = currentArchive.value ? currentArchive.value.id : '';
-    // 请确保后端API路径是这个，或者根据您的后端进行修改
+    // [COMMENT] 后端接口地址，VITE_APP_BASE_API是环境变量，指向后端服务地址
     return `${import.meta.env.VITE_APP_BASE_API}/manage/archive/uploadDestructionCertificate?archiveId=${archiveId}`;
 });
 
-// 【修正】点击“上传”或“重新上传”按钮时的处理函数
+// 点击“上传凭证”按钮
 const handleUploadCertificate = (row) => {
-    currentArchive.value = row; // 保存当前操作的档案行数据
+    currentArchive.value = row; // 保存当前档案行数据
     uploadDialogVisible.value = true;
 };
 
-// 文件上传前的校验 (逻辑正确，无需修改)
+// 文件上传前的校验
 const beforeUpload = (file) => {
     const isPDF = file.type === 'application/pdf';
     const isLt10M = file.size / 1024 / 1024 < 10;
@@ -419,32 +420,44 @@ const beforeUpload = (file) => {
     return true;
 };
 
-// 【修正】上传成功后的处理函数，移除了不相关的项目更新逻辑
+// 文件上传成功后的回调
 const handleUploadSuccess = (response, file) => {
     if (response.code === 200) {
         proxy.$modal.msgSuccess('上传成功');
-        getList(); // 刷新列表，获取最新的档案信息（包含佐证URL）
         uploadDialogVisible.value = false;
+        getList(); // 刷新列表，以更新“上传凭证”/“查看凭证”按钮的状态和凭证URL
     } else {
         proxy.$modal.msgError(response.msg || '上传失败');
     }
 };
 
-// 【修正】查看佐证材料，使用正确的变量
+// [ADDED] 文件上传失败的回调
+const handleUploadError = (err) => {
+    proxy.$modal.msgError("上传失败，请检查网络或联系管理员");
+    console.error("Upload error:", err);
+};
+
+
+// 查看凭证
 const viewCertificate = (row) => {
-    // 后端返回的档案对象中应包含 certUrl 字段
-    url.value = row.certUrl;
+    // [COMMENT] 后端返回的档案对象中应包含 destructionCertificateUrl 字段, 并且在前端实体中映射为 certUrl 或直接使用
+    // 这里我们假设它被映射为 `destructionCertificateUrl`
+    url.value = row.destructionCertificateUrl;
     currentArchive.value = row;
     previewDialogVisible.value = true;
 };
 
-// 【修正】下载佐证材料，使用正确的变量和文件名
+// 下载凭证
 const downloadCertificate = () => {
+    if (!currentArchive.value || !url.value) {
+        proxy.$modal.msgError("凭证URL无效");
+        return;
+    }
     const fileName = `销毁佐证-${currentArchive.value.danghao || 'file'}.pdf`;
     downloadFileWithFetch(url.value, fileName);
 };
 
-// 下载文件的辅助函数 (逻辑正确，无需修改)
+// 下载文件的辅助函数
 const downloadFileWithFetch = async (presignedUrl, filename) => {
     try {
         const response = await fetch(presignedUrl);
@@ -463,8 +476,8 @@ const downloadFileWithFetch = async (presignedUrl, filename) => {
         proxy.$modal.msgError('下载失败');
     }
 };
-// ===佐证材料上传修正结束 ===
 
+// === 销毁申请 ===
 
 // 销毁申请弹窗
 const destroyDialog = reactive({

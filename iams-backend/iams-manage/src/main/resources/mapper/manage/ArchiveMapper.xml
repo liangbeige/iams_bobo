@@ -54,7 +54,7 @@
         SELECT
             a.*,  -- 原有字段
             p.name AS project_name, -- 项目名称
-            f.name AS fonds_name    -- 全宗名称
+            f.name AS fonds_name,    -- 全宗名称
             a.has_destruction_certificate, a.destruction_certificate_url
         FROM tb_archive a
                  LEFT JOIN tb_project p ON a.project_id = p.id
