@@ -46,16 +46,14 @@
         <result property="projectName" column="project_name"/>
         <result property="fondsName" column="fonds_name"/>
     </resultMap>
-    <!--    <sql id="selectArchiveVo">-->
-    <!--        select id, danghao, name, rfid, jianhao, secret_level, secret_peroid, desecret_date, retention_period, carrier_type, start_date, end_date, guidang_time, shiti_location, dianzi_location, directory, description, formation_unit, transfer_unit, document_count, status, authenticity, integrity, availability, security, category_id, fonds_id, create_time, create_by, update_time, update_by, remark, extra_info ,p.name AS project_name from tb_archive a-->
-    <!--         LEFT JOIN tb_project p ON a.project_id = p.id-->
-    <!--    </sql>-->
+
     <sql id="selectArchiveVo">
         SELECT
             a.*,  -- 原有字段
             p.name AS project_name, -- 项目名称
             f.name AS fonds_name,    -- 全宗名称
-            a.has_destruction_certificate, a.destruction_certificate_url
+            a.has_destruction_certificate,
+            a.destruction_certificate_url
         FROM tb_archive a
                  LEFT JOIN tb_project p ON a.project_id = p.id
                  LEFT JOIN tb_fonds f ON a.fonds_id = f.id
@@ -63,7 +61,6 @@
     <select id="selectArchiveListByStatuses" resultMap="ArchiveResult">
         SELECT * FROM tb_archive
         <where>
-            <!-- 修正参数引用为 archive.xxx -->
             <if test="archive.danghao != null and archive.danghao != ''">
                 AND danghao Like CONCAT('%', #{archive.danghao}, '%')
             </if>
@@ -73,12 +70,10 @@
             <if test="archive.categoryId != null and archive.categoryId != ''">
                 AND LOWER(category_id) LIKE CONCAT('%', LOWER(#{archive.categoryId}), '%')
             </if>
-            <!-- 其他字段保持相同修改方式 -->
             <if test="archive.rfid != null and archive.rfid != ''">
                 AND rfid = #{archive.rfid}
             </if>
 
-            <!-- 状态查询 -->
             AND status IN
             <foreach collection="statuses" item="status" open="(" separator="," close=")">
                 #{status}
@@ -118,16 +113,13 @@
             </if>
 
             <choose>
-                <!-- 同时有大类和小类时，两个都要匹配 -->
                 <when test="rootCategoryCode != null and rootCategoryCode != '' and categoryCode != null and categoryCode != ''">
                     AND a.category_id LIKE CONCAT('%', #{rootCategoryCode}, '%')
                     AND a.category_id LIKE CONCAT('%', #{categoryCode}, '%')
                 </when>
-                <!-- 只有大类时 -->
                 <when test="rootCategoryCode != null and rootCategoryCode != ''">
                     AND a.category_id LIKE CONCAT('%', #{rootCategoryCode}, '%')
                 </when>
-                <!-- 只有小类时 -->
                 <when test="categoryCode != null and categoryCode != ''">
                     AND a.category_id LIKE CONCAT('%', #{categoryCode}, '%')
                 </when>
@@ -261,6 +253,8 @@
             <if test="extraInfo != null">extra_info,</if>
             <if test="projectId != null">project_id,</if>
             <if test="juanhao != null">juanhao,</if>
+            <if test="hasDestructionCertificate != null">has_destruction_certificate,</if>
+            <if test="destructionCertificateUrl != null and destructionCertificateUrl != ''">destruction_certificate_url</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="danghao != null">#{danghao},</if>
@@ -297,7 +291,14 @@
             <if test="remark != null">#{remark},</if>
             <if test="extraInfo != null">#{extraInfo},</if>
             <if test="projectId != null">#{projectId},</if>
-            <if test="juanhao != null">#{juanhao}</if>
+            <if test="juanhao != null">#{juanhao},</if>
+            <if test="hasDestructionCertificate != null">
+                <choose>
+                    <when test="hasDestructionCertificate == true">1</when>
+                    <otherwise>0</otherwise>
+                </choose>,
+            </if>
+            <if test="destructionCertificateUrl != null and destructionCertificateUrl != ''">#{destructionCertificateUrl}</if>
         </trim>
     </insert>
 
@@ -338,7 +339,15 @@
             <if test="remark != null">remark = #{remark},</if>
             <if test="extraInfo != null">extra_info = #{extraInfo},</if>
             <if test="projectId != null">project_id = #{projectId},</if>
-            <if test="juanhao != null">juanhao = #{juanhao}</if>
+            <if test="juanhao != null">juanhao = #{juanhao},</if>
+            <if test="hasDestructionCertificate != null">
+                has_destruction_certificate =
+                <choose>
+                    <when test="hasDestructionCertificate == true">1</when>
+                    <otherwise>0</otherwise>
+                </choose>,
+            </if>
+            <if test="destructionCertificateUrl != null and destructionCertificateUrl != ''">destruction_certificate_url = #{destructionCertificateUrl}</if>
         </trim>
         where id = #{id}
     </update>
@@ -346,8 +355,16 @@
     <update id="updateArchiveCertificateInfo" parameterType="Archive">
         update tb_archive
         <set>
-            has_destruction_certificate = #{hasDestructionCertificate},
-            destruction_certificate_url = #{destructionCertificateUrl}
+            <if test="hasDestructionCertificate != null">
+                has_destruction_certificate =
+                <choose>
+                    <when test="hasDestructionCertificate == true">1</when>
+                    <otherwise>0</otherwise>
+                </choose>,
+            </if>
+            <if test="destructionCertificateUrl != null">
+                destruction_certificate_url = #{destructionCertificateUrl}
+            </if>
         </set>
         where id = #{id}
     </update>
@@ -451,7 +468,6 @@
         </foreach>
     </insert>
 
-    <!-- 检查批量档号是否存在 -->
     <select id="checkDanghaoExistsBatch" resultType="int">
         SELECT COUNT(1)
         FROM tb_archive
@@ -461,7 +477,6 @@
         </foreach>
     </select>
 
-    <!-- 获取具体重复存在的档号列表 -->
     <select id="getExistingDanghaos" resultType="String">
         SELECT danghao
         FROM tb_archive
@@ -473,7 +488,6 @@
     </select>
 
 
-    <!-- 检查批量档号是否存在（排除指定ID） -->
     <select id="checkDanghaoExistsBatchExcludeId" resultType="int">
         SELECT COUNT(1)
         FROM tb_archive
@@ -484,7 +498,6 @@
         AND id != #{excludeId}
     </select>
 
-    <!-- 获取具体重复存在的档号列表（排除指定ID） -->
     <select id="getExistingDanghaosExcludeId" resultType="String">
         SELECT danghao
         FROM tb_archive
@@ -496,7 +509,6 @@
         ORDER BY danghao
     </select>
 
-    <!-- 根据ID列表查询档案 -->
     <select id="selectArchiveListByIds" resultMap="ArchiveResult">
         <include refid="selectArchiveVo"/>
         WHERE a.id IN
@@ -505,17 +517,9 @@
         </foreach>
     </select>
 
-    <!-- 根据 danghao 获取档案 -->
-    <!--    <select id="selectArchiveByDanghao" resultType="com.iams.manage.domain.Archive">-->
-    <!--        SELECT * FROM tb_archive-->
-    <!--        WHERE mysqlDanghao = #{danghao}-->
-    <!--    </select>-->
-
     <select id="selectDanghaoMapByIds" resultType="map">
         SELECT
-        id,          <!-- 原始字段名 -->
-        danghao      <!-- 原始字段名 -->
-        FROM tb_archive
+        id,          danghao      FROM tb_archive
         WHERE id IN
         <foreach item="id" collection="archiveIds" open="(" separator="," close=")">
             #{id}
@@ -523,14 +527,12 @@
     </select>
 
 
-    <!-- 按项目查询档案 -->
     <select id="selectArchiveByProjectId" parameterType="Long" resultMap="ArchiveResult">
         <include refid="selectArchiveVo"/>
         WHERE a.project_id = #{projectId}
         ORDER BY a.category_id ASC
     </select>
 
-    <!-- 新增方法：项目档案数量统计 -->
     <select id="countArchiveByProject" resultType="java.util.Map">
         SELECT
             p.id AS project_id,
@@ -542,14 +544,12 @@
     </select>
 
 
-    <!-- 统计项目下档案数量 -->
     <select id="countByProjectId" resultType="java.lang.Long">
         SELECT COUNT(*)
         FROM tb_archive
         WHERE project_id = #{projectId}
     </select>
 
-    <!-- 根据门类号查询档案 -->
     <select id="selectByCategoryId" parameterType="map" resultType="archive">
         SELECT *
         FROM tb_archive
@@ -557,7 +557,6 @@
         ORDER BY category_id ASC
     </select>
 
-    <!-- 根据RFID查询档案 -->
     <select id="selectArchiveByRfid" parameterType="String" resultMap="ArchiveResult">
         SELECT *
         FROM tb_archive

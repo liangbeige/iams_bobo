@@ -184,7 +184,7 @@
             <template #footer>
                 <div class="dialog-footer">
                     <el-button @click="previewDialogVisible = false">关 闭</el-button>
-                    <el-button type="primary" @click="downloadCertificate()">下 载</el-button>
+<!--                    <el-button type="primary" @click="downloadCertificate()">下 载</el-button>-->
                 </div>
             </template>
         </el-dialog>
@@ -425,7 +425,11 @@ const handleUploadSuccess = (response, file) => {
     if (response.code === 200) {
         proxy.$modal.msgSuccess('上传成功');
         uploadDialogVisible.value = false;
-        getList(); // 刷新列表，以更新“上传凭证”/“查看凭证”按钮的状态和凭证URL
+        // [MODIFIED] 直接更新当前操作行的数据
+        if (currentArchive.value) {
+            currentArchive.value.hasDestructionCertificate = true;
+            currentArchive.value.destructionCertificateUrl = response.url;
+        }
     } else {
         proxy.$modal.msgError(response.msg || '上传失败');
     }
